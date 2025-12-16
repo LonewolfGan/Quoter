@@ -37,10 +37,10 @@ export const NotFound = () => {
 
         {/* Citation inspirante */}
         <div className="mb-12 p-6 border-2 border-black dark:border-white rounded-2xl bg-gray-50 dark:bg-gray-900">
-          <p className="text-lg italic text-gray-700 dark:text-gray-300 mb-2">
+          <p className="text-lg  text-gray-700 dark:text-gray-300 mb-2 text-center">
             "Se perdre, c'est parfois le meilleur moyen de se retrouver."
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-500">— Anonyme</p>
+          <p className="text-sm text-gray-500 dark:text-gray-500 text-center">Lonewolf</p>
         </div>
 
         {/* Actions */}

@@ -97,7 +97,7 @@ export const Header = () => {
       clearTimeout(timeout2);
       clearTimeout(initialDelay);
     };
-  }, [currentIndex, images.length]);
+  }, [currentIndex]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

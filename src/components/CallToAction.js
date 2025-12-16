@@ -31,7 +31,7 @@ export const CallToAction = () => {
       title: "Envie de plus de leçons de vie ?",
       text: "Explorez nos milliers de citations et trouvez l'inspiration qui vous correspond",
       buttons: [
-        { label: "Découvrir la citation du jour", to: "/", primary: false },
+        { label: "Citation du jour", to: "/", primary: false },
         { label: "Explorer les catégories", to: "/categories", primary: true },
         { label: "Explorer les auteurs", to: "/authors", primary: false },
       ],
@@ -41,7 +41,7 @@ export const CallToAction = () => {
       title: "Vous cherchez un auteur spécifique ?",
       text: "Parcourez notre liste d'auteurs célèbres pour plus d'inspiration",
       buttons: [
-        { label: "Découvrir la citation du jour", to: "/", primary: false },
+        { label: "Citation du jour", to: "/", primary: false },
         { label: "Voir les auteurs", to: "/authors", primary: true },
         { label: "Voir le blog", to: "/blog", primary: false },
       ],
@@ -51,7 +51,7 @@ export const CallToAction = () => {
       title: "Explorez par thématique",
       text: "Trouvez des citations par sujet qui vous passionne",
       buttons: [
-        { label: "Découvrir la citation du jour", to: "/", primary: false },
+        { label: "Citation du jour", to: "/", primary: false },
         { label: "Explorer les catégories", to: "/categories", primary: true },
         { label: "Voir le blog", to: "/blog", primary: false },
       ],
