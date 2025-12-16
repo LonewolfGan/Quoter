@@ -5,30 +5,44 @@ import authors from "../assets/authors/authors";
 export const AuthorQuote = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  /* const {
-    imageIndex,
-    imageUrl,
-    name,
-    bio,
-    birth,
-    death,
-    nationality,
-    domain,
-    knownFor,
-  } = location.state || {}; */
+  // Get the initial values from location.state or use empty values as fallback
+  const {
+    imageIndex: initialImageIndex,
+    imageUrl: initialImageUrl,
+    name = '',
+    bio: initialBio,
+    birth: initialBirth,
+    death: initialDeath,
+    nationality: initialNationality,
+    domain: initialDomain,
+    knownFor: initialKnownFor,
+  } = location.state || {};
 
-  const name =
-    location.state?.name ||
-    decodeURIComponent(location.pathname.split("/").pop());
-  const author = authors.find((author) => author.name === name);
-  const imageUrl = author.image;
-  const imageIndex = author?.imageIndex || author.name;
-  const bio = author.bio;
-  const birth = author.birth;
-  const death = author.death;
-  const nationality = author.nationality;
-  const domain = author.domain;
-  const knownFor = author.knownFor;
+  // Initialize variables with values from location.state or find in authors
+  const decodedPath = decodeURIComponent(location.pathname.split('/').pop());
+  let imageUrl = initialImageUrl;
+  let imageIndex = initialImageIndex;
+  let bio = initialBio;
+  let birth = initialBirth;
+  let death = initialDeath;
+  let nationality = initialNationality;
+  let domain = initialDomain;
+  let knownFor = initialKnownFor;
+
+  if (decodedPath && decodedPath === name) {
+    const author = authors.find((a) => a.name === name);
+    if (author) {
+      imageUrl = author.image;
+      imageIndex = author.imageIndex || author.name;
+      bio = author.bio;
+      birth = author.birth;
+      death = author.death;
+      nationality = author.nationality;
+      domain = author.domain;
+      knownFor = author.knownFor;
+    }
+  }
+
   return (
     <div className="min-h-screen p-8">
       <button
