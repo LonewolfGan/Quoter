@@ -27,36 +27,57 @@ export const Header = () => {
     "Espoir",
   ].sort();
   useEffect(() => {
+    // Préchargement des images avec gestion des chemins en production
     const preloadImage = (index) => {
       if (index >= images.length) return;
 
       const img = new Image();
-      img.src = images[index];
+      // Ajout de process.env.PUBLIC_URL pour la production
+      const imageUrl = images[index].startsWith('http') ? 
+        images[index] : 
+        `${process.env.PUBLIC_URL}${images[index]}`;
+      
+      img.src = imageUrl;
 
-      img.onload = () => preloadImage(index + 1);
-      img.onerror = () => preloadImage(index + 1);
+      img.onload = () => {
+        // Mettre à jour le src avec l'URL complète pour le cache
+        images[index] = imageUrl;
+        preloadImage(index + 1);
+      };
+      img.onerror = (e) => {
+        console.error(`Erreur de chargement de l'image: ${imageUrl}`, e);
+        preloadImage(index + 1);
+      };
     };
 
     preloadImage(0);
   }, []);
 
   useEffect(() => {
+    let timeout1, timeout2;
     const intervalId = setInterval(() => {
       const next = (currentIndex + 1) % images.length;
       setNextIndex(next);
 
-      setTimeout(() => {
+      timeout1 = setTimeout(() => {
         setIsTransitioning(true);
       }, 50);
 
-      setTimeout(() => {
+      // Réinitialiser les timeouts précédents pour éviter les fuites de mémoire
+      if (timeout2) clearTimeout(timeout2);
+      
+      timeout2 = setTimeout(() => {
         setCurrentIndex(next);
         setIsTransitioning(false);
       }, 1550);
     }, 8000);
 
-    return () => clearInterval(intervalId);
-  }, [currentIndex]);
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(timeout1);
+      clearTimeout(timeout2);
+    };
+  }, [currentIndex, images.length]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -83,8 +104,16 @@ export const Header = () => {
           <div
             className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
             style={{
-              backgroundImage: `url(${images[currentIndex]})`,
+              backgroundImage: `url(${
+                images[currentIndex]?.startsWith('http')
+                  ? images[currentIndex]
+                  : `${process.env.PUBLIC_URL}${images[currentIndex]}`
+              })`,
               opacity: 0.5,
+            }}
+            onError={(e) => {
+              console.error('Erreur de chargement de l\'image de fond:', images[currentIndex]);
+              e.target.style.display = 'none';
             }}
           />
         )}
@@ -94,8 +123,16 @@ export const Header = () => {
           <div
             className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
             style={{
-              backgroundImage: `url(${images[nextIndex]})`,
+              backgroundImage: `url(${
+                images[nextIndex]?.startsWith('http')
+                  ? images[nextIndex]
+                  : `${process.env.PUBLIC_URL}${images[nextIndex]}`
+              })`,
               opacity: isTransitioning ? 0.5 : 0,
+            }}
+            onError={(e) => {
+              console.error('Erreur de chargement de l\'image de transition:', images[nextIndex]);
+              e.target.style.display = 'none';
             }}
           />
         )}
