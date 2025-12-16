@@ -27,25 +27,18 @@ export const Header = () => {
     "Espoir",
   ].sort();
   useEffect(() => {
-    // Préchargement des images avec gestion des chemins en production
+    // Préchargement des images
     const preloadImage = (index) => {
       if (index >= images.length) return;
 
       const img = new Image();
-      // Ajout de process.env.PUBLIC_URL pour la production
-      const imageUrl = images[index].startsWith('http') ? 
-        images[index] : 
-        `${process.env.PUBLIC_URL}${images[index]}`;
-      
-      img.src = imageUrl;
+      img.src = images[index];
 
       img.onload = () => {
-        // Mettre à jour le src avec l'URL complète pour le cache
-        images[index] = imageUrl;
         preloadImage(index + 1);
       };
       img.onerror = (e) => {
-        console.error(`Erreur de chargement de l'image: ${imageUrl}`, e);
+        console.error(`Erreur de chargement de l'image: ${images[index]}`, e);
         preloadImage(index + 1);
       };
     };
@@ -104,12 +97,13 @@ export const Header = () => {
           <div
             className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
             style={{
-              backgroundImage: `url(${
-                images[currentIndex]?.startsWith('http')
-                  ? images[currentIndex]
-                  : `${process.env.PUBLIC_URL}${images[currentIndex]}`
-              })`,
+              backgroundImage: `url(${images[currentIndex]})`,
               opacity: 0.5,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              willChange: 'opacity',
+              transition: 'opacity 1.5s ease-in-out'
             }}
             onError={(e) => {
               console.error('Erreur de chargement de l\'image de fond:', images[currentIndex]);
@@ -123,12 +117,13 @@ export const Header = () => {
           <div
             className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
             style={{
-              backgroundImage: `url(${
-                images[nextIndex]?.startsWith('http')
-                  ? images[nextIndex]
-                  : `${process.env.PUBLIC_URL}${images[nextIndex]}`
-              })`,
+              backgroundImage: `url(${images[nextIndex]})`,
               opacity: isTransitioning ? 0.5 : 0,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              willChange: 'opacity',
+              transition: 'opacity 1.5s ease-in-out'
             }}
             onError={(e) => {
               console.error('Erreur de chargement de l\'image de transition:', images[nextIndex]);
