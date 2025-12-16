@@ -7,42 +7,46 @@ export const AuthorQuote = () => {
   const navigate = useNavigate();
   // Get the initial values from location.state or use empty values as fallback
   const {
-    imageIndex: initialImageIndex,
-    imageUrl: initialImageUrl,
-    name: name,
-    bio: initialBio,
-    birth: initialBirth,
-    death: initialDeath,
-    nationality: initialNationality,
-    domain: initialDomain,
-    knownFor: initialKnownFor,
+    imageIndex: stateImageIndex,
+    imageUrl: stateImageUrl,
+    name: stateName,
+    bio: stateBio,
+    birth: stateBirth,
+    death: stateDeath,
+    nationality: stateNationality,
+    domain: stateDomain,
+    knownFor: stateKnownFor,
   } = location.state || {};
 
-  // Initialize variables with values from location.state or find in authors
+  // Get author name from URL or location.state
   const decodedPath = decodeURIComponent(location.pathname.split('/').pop());
-  let imageUrl = initialImageUrl;
-  let imageIndex = initialImageIndex;
-  let bio = initialBio;
-  let birth = initialBirth;
-  let death = initialDeath;
-  let nationality = initialNationality;
-  let domain = initialDomain;
-  let knownFor = initialKnownFor;
-
-  if (decodedPath && decodedPath === name) {
-    console.log("decodepath", decodedPath)
-    const author = authors.find((a) => a.name === name);
-    if (author) {
-      imageUrl = author.image;
-      imageIndex = author.imageIndex || author.name;
-      bio = author.bio;
-      birth = author.birth;
-      death = author.death;
-      nationality = author.nationality;
-      domain = author.domain;
-      knownFor = author.knownFor;
+  const name = stateName || decodedPath;
+  
+  // Find the author in the authors array
+  const author = authors.find((a) => a.name === name);
+  
+  // Use values from location.state or from authors array with fallbacks
+  const getImageUrl = (url) => {
+    if (!url) return '';
+    // If it's already an absolute URL, return as is
+    if (url.startsWith('http') || url.startsWith('//') || url.startsWith('data:')) {
+      return url;
     }
-  }
+    // For relative URLs in production, ensure they're served from the public directory
+    return process.env.NODE_ENV === 'production' 
+      ? `${window.location.origin}${url.startsWith('/') ? '' : '/'}${url}`
+      : url;
+  };
+  
+  const imageUrl = getImageUrl(stateImageUrl || author?.image);
+  const imageIndex = stateImageIndex || author?.imageIndex || name;
+  const bio = stateBio || author?.bio || '';
+  const birth = stateBirth || author?.birth || '';
+  const death = stateDeath || author?.death || '';
+  const nationality = stateNationality || author?.nationality || '';
+  const domain = stateDomain || author?.domain || '';
+  const knownFor = stateKnownFor || author?.knownFor || '';
+  
 
   return (
     <div className="min-h-screen p-8">
