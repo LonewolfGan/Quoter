@@ -4,6 +4,7 @@ import { AllRoutes } from "./routes/AllRoutes";
 import { CallToAction } from "./components/CallToAction";
 import { useScrollToTop } from "./hooks/useScrollToTop";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 export const App = () => {
   useScrollToTop();
@@ -18,6 +19,7 @@ export const App = () => {
 
       <Footer />
       <SpeedInsights />
+      <Analytics />
     </div>
   );
 };
