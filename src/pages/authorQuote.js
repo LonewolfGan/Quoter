@@ -9,7 +9,7 @@ export const AuthorQuote = () => {
   const {
     imageIndex: initialImageIndex,
     imageUrl: initialImageUrl,
-    name = '',
+    name: name,
     bio: initialBio,
     birth: initialBirth,
     death: initialDeath,
@@ -30,6 +30,7 @@ export const AuthorQuote = () => {
   let knownFor = initialKnownFor;
 
   if (decodedPath && decodedPath === name) {
+    console.log("decodepath", decodedPath)
     const author = authors.find((a) => a.name === name);
     if (author) {
       imageUrl = author.image;
@@ -199,7 +200,7 @@ export const AuthorQuote = () => {
                         width="24px"
                         height="24px"
                         viewBox="0 0 24 24"
-                        stroke-width="1.5"
+                        strokeWidth="1.5"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
                         color="#000000"
@@ -208,65 +209,65 @@ export const AuthorQuote = () => {
                         <path
                           d="M10 21H5C3.89543 21 3 20.1046 3 19V10H21M15 4V2M15 4V6M15 4H10.5"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M3 10V6C3 4.89543 3.89543 4 5 4H7"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M7 2V6"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M21 10V6C21 4.89543 20.1046 4 19 4H18.5"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M21.6669 16.6667C21.0481 15.097 19.635 14 17.9906 14C16.2322 14 14.7382 15.2545 14.1973 17"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M19.9951 16.772H21.4001C21.7314 16.772 22.0001 16.5034 22.0001 16.172V14.5498"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M14.3341 19.3333C14.9529 20.903 16.366 22 18.0103 22C19.7687 22 21.2628 20.7455 21.8037 19"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M16.0049 19.228H14.5999C14.2686 19.228 13.9999 19.4966 13.9999 19.828V21.4502"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                       </svg>
@@ -289,7 +290,7 @@ export const AuthorQuote = () => {
                       <svg
                         width="24px"
                         height="24px"
-                        stroke-width="1.5"
+                        strokeWidth="1.5"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -299,57 +300,57 @@ export const AuthorQuote = () => {
                         <path
                           d="M3 9.5L12 4L21 9.5"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M5 20H19"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M10 9L14 9"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M6 17L6 12"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M10 17L10 12"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M14 17L14 12"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M18 17L18 12"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                       </svg>
@@ -373,7 +374,7 @@ export const AuthorQuote = () => {
                         width="24px"
                         height="24px"
                         viewBox="0 0 24 24"
-                        stroke-width="1.5"
+                        strokeWidth="1.5"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
                         color="#000000"
@@ -382,73 +383,73 @@ export const AuthorQuote = () => {
                         <path
                           d="M9.95242 9.62272L11.5109 6.31816C11.711 5.89395 12.289 5.89395 12.4891 6.31816L14.0476 9.62272L17.5329 10.1559C17.9801 10.2243 18.1583 10.7996 17.8346 11.1296L15.313 13.7001L15.9081 17.3314C15.9845 17.7978 15.5168 18.1534 15.1167 17.9331L12 16.2177L8.88328 17.9331C8.48316 18.1534 8.01545 17.7978 8.09187 17.3314L8.68695 13.7001L6.16545 11.1296C5.8417 10.7996 6.01993 10.2243 6.46711 10.1559L9.95242 9.62272Z"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M22 12L23 12"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M12 2V1"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M12 23V22"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M20 20L19 19"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M20 4L19 5"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M4 20L5 19"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M4 4L5 5"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                         <path
                           d="M1 12L2 12"
                           stroke="#000000"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                           data-darkreader-inline-stroke=""
                         ></path>
                       </svg>

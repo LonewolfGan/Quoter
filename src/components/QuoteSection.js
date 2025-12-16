@@ -41,11 +41,14 @@ export const QuoteSection = ({ query, name, category }) => {
 
   const totalItems = Math.ceil(allUniqueQuotes.length / itemsPerPage);
 
-  const currentQuote =
-    selectedQuoteIndex !== null ? allUniqueQuotes[selectedQuoteIndex] : null;
+  const [fallBack, setFallBack] = useState(false)
+  const currentQuote = selectedQuoteIndex !== null ? allUniqueQuotes[selectedQuoteIndex] : null;
   const currentImageUrl = currentQuote
-    ? `https://res.cloudinary.com/dbkjpn2db/image/upload/f_auto,q_auto,w_800,h_800,c_fill,g_auto/quote_images/${currentQuote.id}.png`
+    ? `https://res.cloudinary.com/dbkjpn2db/image/upload/${fallBack ? 'f_auto,q_auto,w_800,h_800,c_fill,g_auto/' : ''}quote_images/${currentQuote.id}.png`
     : null;
+  
+
+
 
   return isLoading ? (
     <div className="flex justify-center items-center py-20">
@@ -87,7 +90,15 @@ export const QuoteSection = ({ query, name, category }) => {
               <img
                 src={`https://res.cloudinary.com/dbkjpn2db/image/upload/f_auto,q_auto,w_${size},h_${size},c_fill,g_auto/quote_images/${quote.id}.png`}
                 onError={(e) => {
-                  e.currentTarget.src = placeholder;
+                  if (e.currentTarget.src.includes('f_auto')) {
+                    // First error - try fallback URL
+                    setFallBack(true);
+                    e.currentTarget.src = `https://res.cloudinary.com/dbkjpn2db/image/upload/quote_images/${quote.id}.png`;
+                  } else {
+                    // Fallback also failed - use placeholder
+                    e.currentTarget.src = placeholder;
+                    e.currentTarget.onerror = null; // Prevent infinite loop
+                  }
                 }}
                 onClick={() => setSelectedQuoteIndex(start + index)}
                 className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
