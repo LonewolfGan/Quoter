@@ -1,0 +1,152 @@
+/* Carousel Container */
+.stage {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  overflow: hidden;
+  perspective: 1200px;
+}
+
+/* Background Canvas */
+.bg-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: none; /* Hide animated gradient background */
+}
+
+/* Loader */
+#loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  z-index: 100;
+  transition: opacity 0.3s ease;
+}
+
+#loader.loader--hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Cards Container */
+#cards {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none; /* Let clicks pass through to buttons */
+}
+
+/* Individual Card */
+.card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  user-select: none;
+  transition: filter 0.3s ease, box-shadow 0.3s ease;
+  pointer-events: auto; /* Re-enable pointer events for cards */
+}
+
+.card:hover {
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+}
+
+.card:active {
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.35);
+}
+
+.card__img {
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Dragging State */
+.stage.dragging {
+  cursor: grabbing;
+}
+
+.stage.dragging .card {
+  cursor: grabbing;
+}
+
+/* Navigation Buttons */
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100; /* Increased to be above cards */
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Hide navigation buttons by default (desktop) */
+.carousel-nav--mobile-only {
+  display: none;
+}
+
+.carousel-nav:hover {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-nav:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.carousel-nav--prev {
+  left: 20px;
+}
+
+.carousel-nav--next {
+  right: 20px;
+}
+
+.carousel-nav svg {
+  color: #333;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Show navigation buttons on mobile */
+  .carousel-nav--mobile-only {
+    display: flex;
+  }
+
+  .carousel-nav {
+    width: 44px;
+    height: 44px;
+  }
+
+  .carousel-nav--prev {
+    left: 10px;
+  }
+
+  .carousel-nav--next {
+    right: 10px;
+  }
+}
