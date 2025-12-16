@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTitle } from "../hooks";
 import {
   Heart,
   Sparkles,
@@ -40,6 +41,8 @@ const categoryIcons = {
 };
 
 export const Categories = () => {
+  const title = "Quoter - Categories";
+  useTitle({ title });
   // Extract unique categories
   const categories = [
     "Amour",

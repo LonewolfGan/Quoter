@@ -1,1 +1,0 @@
-export { AuthorsLayout } from "./AuthorsLayout";

@@ -1,11 +1,13 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { Carousel3D } from "../components/index";
 import { useNavigate } from "react-router-dom";
+import { useTitle } from "../hooks";
 
 export const AuthorsLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const title = "Quoter - Authors";
+  useTitle({ title });
   // Affiche le carousel seulement sur la page principale /authors
   const showCarousel = location.pathname === "/authors";
 
@@ -20,7 +22,7 @@ export const AuthorsLayout = () => {
     domain,
     knownFor
   ) => {
-    navigate("/authors/quote", {
+    navigate(`/authors/${name}`, {
       state: {
         imageIndex: index,
         imageUrl: imageUrl,

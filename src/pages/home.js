@@ -1,7 +1,7 @@
 import placeholder from "../assets/1.png";
-import { useDownload } from "../hooks/useDownload";
-import { useShare } from "../hooks/useShare";
+import { useDownload, useShare, useTitle } from "../hooks/index";
 import { useQuote } from "../context/QuoteContext";
+
 import {
   Share2,
   Download,
@@ -14,7 +14,8 @@ export const Home = () => {
   const { dailyQuote, isLoading } = useQuote();
   const { handleDownload } = useDownload();
   const { handleShare } = useShare();
-
+  const title = "Quoter - Home";
+  useTitle({ title });
   if (isLoading || !dailyQuote) {
     console.log("isLoading", isLoading);
     console.log("dailyQuote", dailyQuote);

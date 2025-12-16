@@ -1,9 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { QuoteSection } from "../components/QuoteSection";
+import { useTitle } from "../hooks";
 
 export const CategoryQuotes = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const title = `Quoter - ${slug}`;
+  useTitle({ title });
   return (
     <main className="min-h-screen p-8">
       <button

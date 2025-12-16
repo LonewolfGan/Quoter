@@ -4,6 +4,7 @@ import authors from "../assets/authors/authors";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuote } from "../context/QuoteContext";
+import { useTitle } from "../hooks";
 
 export const Blog = () => {
   const { dailyQuote, dailyArticle, isLoading, isGenerating } = useQuote();
@@ -11,6 +12,8 @@ export const Blog = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const articlesPerPage = 9;
   const [searchQuery, setSearchQuery] = useState("");
+  const title = "Quoter - Blog";
+  useTitle({ title });
 
   const normalize = (str) =>
     str
@@ -196,7 +199,7 @@ export const Blog = () => {
                         normalize(a.name) === normalize(dailyArticle.author)
                     );
                     return matchedAuthor
-                      ? `/authors/quote/${matchedAuthor.name}`
+                      ? `/authors/${matchedAuthor.name}`
                       : "/authors";
                   })()}
                   className="flex-1 px-6 py-3 bg-black text-white rounded-full hover:bg-white hover:text-black hover:border-2 hover:border-black transition-colors text-center font-semibold"
@@ -249,36 +252,42 @@ export const Blog = () => {
                       key={article.id}
                       className="bg-white rounded-xl border-2 border-black overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
                     >
-                      <div className="p-6">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-xs text-gray-500">
-                            {new Date(
-                              article.published_date
-                            ).toLocaleDateString("fr-FR", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </span>
-                          <span className="text-xs text-gray-500">6 min</span>
-                        </div>
-                        <h3 className="text-xl font-bold mb-2 group-hover:underline ">
-                          {article.title.replace(/ (:)/g, "\u00A0$1")}
-                        </h3>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                          {article.excerpt}
-                        </p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="inline-block px-3 py-1 bg-black text-white rounded-full text-xs font-medium">
-                            {article.author}
-                          </span>
-                          {article.category && (
-                            <span className="inline-block px-3 py-1 bg-gray-100 rounded-full text-xs font-medium">
-                              {article.category}
+                      <Link
+                        key={article.id}
+                        to={`/blog/${article.id}`}
+                        className="bg-white  overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group block"
+                      >
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs text-gray-500">
+                              {new Date(
+                                article.published_date
+                              ).toLocaleDateString("fr-FR", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
                             </span>
-                          )}
+                            <span className="text-xs text-gray-500">6 min</span>
+                          </div>
+                          <h3 className="text-xl font-bold mb-2 group-hover:underline ">
+                            {article.title.replace(/ (:)/g, "\u00A0$1")}
+                          </h3>
+                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                            {article.excerpt}
+                          </p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="inline-block px-3 py-1 bg-black text-white rounded-full text-xs font-medium">
+                              {article.author}
+                            </span>
+                            {article.category && (
+                              <span className="inline-block px-3 py-1 bg-gray-100 rounded-full text-xs font-medium">
+                                {article.category}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      </Link>
                     </div>
                   ))}
                 </div>

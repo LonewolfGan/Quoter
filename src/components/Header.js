@@ -26,49 +26,76 @@ export const Header = () => {
     "Liberté",
     "Espoir",
   ].sort();
+  // Effet pour le préchargement des images
   useEffect(() => {
-    // Préchargement des images
+    let isMounted = true;
+    
     const preloadImage = (index) => {
-      if (index >= images.length) return;
+      if (index >= images.length || !isMounted) return;
 
       const img = new Image();
       img.src = images[index];
 
       img.onload = () => {
-        preloadImage(index + 1);
+        if (isMounted) {
+          // Ajouter un léger délai entre chaque préchargement
+          setTimeout(() => preloadImage(index + 1), 50);
+        }
       };
+      
       img.onerror = (e) => {
         console.error(`Erreur de chargement de l'image: ${images[index]}`, e);
-        preloadImage(index + 1);
+        if (isMounted) preloadImage(index + 1);
       };
     };
 
     preloadImage(0);
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
+  // Effet pour la rotation des images
   useEffect(() => {
     let timeout1, timeout2;
-    const intervalId = setInterval(() => {
+    let isMounted = true;
+    let intervalId;
+
+    const rotateImages = () => {
+      if (!isMounted) return;
+      
       const next = (currentIndex + 1) % images.length;
       setNextIndex(next);
 
       timeout1 = setTimeout(() => {
-        setIsTransitioning(true);
+        if (isMounted) {
+          setIsTransitioning(true);
+        }
       }, 50);
 
-      // Réinitialiser les timeouts précédents pour éviter les fuites de mémoire
-      if (timeout2) clearTimeout(timeout2);
-      
       timeout2 = setTimeout(() => {
-        setCurrentIndex(next);
-        setIsTransitioning(false);
+        if (isMounted) {
+          setCurrentIndex(next);
+          setIsTransitioning(false);
+        }
       }, 1550);
-    }, 8000);
+    };
 
+    // Démarrer l'intervalle après un court délai initial
+    const initialDelay = setTimeout(() => {
+      if (isMounted) {
+        intervalId = setInterval(rotateImages, 8000);
+      }
+    }, 1000);
+
+    // Nettoyage
     return () => {
+      isMounted = false;
       clearInterval(intervalId);
       clearTimeout(timeout1);
       clearTimeout(timeout2);
+      clearTimeout(initialDelay);
     };
   }, [currentIndex, images.length]);
 
@@ -103,7 +130,9 @@ export const Header = () => {
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
               willChange: 'opacity',
-              transition: 'opacity 1.5s ease-in-out'
+              transition: 'opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
+              backfaceVisibility: 'hidden',
+              transform: 'translateZ(0)'
             }}
             onError={(e) => {
               console.error('Erreur de chargement de l\'image de fond:', images[currentIndex]);
@@ -123,7 +152,9 @@ export const Header = () => {
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
               willChange: 'opacity',
-              transition: 'opacity 1.5s ease-in-out'
+              transition: 'opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
+              backfaceVisibility: 'hidden',
+              transform: 'translateZ(0)'
             }}
             onError={(e) => {
               console.error('Erreur de chargement de l\'image de transition:', images[nextIndex]);

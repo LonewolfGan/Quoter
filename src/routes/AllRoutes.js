@@ -8,6 +8,7 @@ import {
   Search,
 } from "../pages/index";
 import { AuthorsLayout } from "../layouts/AuthorsLayout";
+import { ArticleDetail, NotFound } from "../pages/index";
 
 export const AllRoutes = () => {
   return (
@@ -21,12 +22,13 @@ export const AllRoutes = () => {
       {/* Authors avec layout persistent */}
       <Route path="/authors" element={<AuthorsLayout />}>
         <Route index element={null} />{" "}
-        {/* Page principale vide, le carousel est dans le layout */}
-        <Route path="quote" element={<AuthorQuote />} />
-        <Route path="quote/:slug" element={<AuthorQuote />} />
+        <Route path=":slug" element={<AuthorQuote />} />
       </Route>
 
       <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:id" element={<ArticleDetail />} />
+
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

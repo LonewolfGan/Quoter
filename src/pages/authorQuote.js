@@ -1,10 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { QuoteSection } from "../components/QuoteSection";
 import authors from "../assets/authors/authors";
+import { useTitle } from "../hooks";
 
 export const AuthorQuote = () => {
   const location = useLocation();
   const navigate = useNavigate();
+ 
   // Get the initial values from location.state or use empty values as fallback
   const {
     imageIndex: stateImageIndex,
@@ -19,34 +21,40 @@ export const AuthorQuote = () => {
   } = location.state || {};
 
   // Get author name from URL or location.state
-  const decodedPath = decodeURIComponent(location.pathname.split('/').pop());
+  const decodedPath = decodeURIComponent(location.pathname.split("/").pop());
   const name = stateName || decodedPath;
-  
+ const title = `Quoter - ${name}`;
+  useTitle({ title });
   // Find the author in the authors array
   const author = authors.find((a) => a.name === name);
-  
+
+
+
   // Use values from location.state or from authors array with fallbacks
   const getImageUrl = (url) => {
-    if (!url) return '';
+    if (!url) return "";
     // If it's already an absolute URL, return as is
-    if (url.startsWith('http') || url.startsWith('//') || url.startsWith('data:')) {
+    if (
+      url.startsWith("http") ||
+      url.startsWith("//") ||
+      url.startsWith("data:")
+    ) {
       return url;
     }
     // For relative URLs in production, ensure they're served from the public directory
-    return process.env.NODE_ENV === 'production' 
-      ? `${window.location.origin}${url.startsWith('/') ? '' : '/'}${url}`
+    return process.env.NODE_ENV === "production"
+      ? `${window.location.origin}${url.startsWith("/") ? "" : "/"}${url}`
       : url;
   };
-  
+
   const imageUrl = getImageUrl(stateImageUrl || author?.image);
   const imageIndex = stateImageIndex || author?.imageIndex || name;
-  const bio = stateBio || author?.bio || '';
-  const birth = stateBirth || author?.birth || '';
-  const death = stateDeath || author?.death || '';
-  const nationality = stateNationality || author?.nationality || '';
-  const domain = stateDomain || author?.domain || '';
-  const knownFor = stateKnownFor || author?.knownFor || '';
-  
+  const bio = stateBio || author?.bio || "";
+  const birth = stateBirth || author?.birth || "";
+  const death = stateDeath || author?.death || "";
+  const nationality = stateNationality || author?.nationality || "";
+  const domain = stateDomain || author?.domain || "";
+  const knownFor = stateKnownFor || author?.knownFor || "";
 
   return (
     <div className="min-h-screen p-8">
