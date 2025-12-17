@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Quoter",
+  "name": "Quoter - Citations inspirantes",
+  "description": "Découvrez des citations inspirantes de grands auteurs",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,18 +9,42 @@
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
+      "src": "logo1.webp",
+      "type": "image/webp",
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "logo1.webp",
+      "type": "image/webp",
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "categories": [
+    "education",
+    "inspiration",
+    "quotes"
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Citations du jour",
+      "short_name": "Accueil",
+      "description": "Voir les citations du jour",
+      "url": "/"
+    },
+    {
+      "name": "Catégories",
+      "short_name": "Catégories",
+      "description": "Parcourir par catégorie",
+      "url": "/categories"
+    }
+  ]
 }

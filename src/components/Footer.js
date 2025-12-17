@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Github, MessageCircle, Shield, FileText } from "lucide-react";
-import logo from "../assets/logo/1.png";
+import logo from "../assets/logo/1.webp";
 
 export const Footer = () => {
   return (

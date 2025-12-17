@@ -1,4 +1,3 @@
-// context/QuoteContext.jsx
 import {
   createContext,
   useContext,

@@ -1,4 +1,3 @@
-import placeholder from "../assets/1.png";
 import { useDownload, useShare, useTitle } from "../hooks/index";
 import { useQuote } from "../context/QuoteContext";
 
@@ -28,7 +27,7 @@ export const Home = () => {
       </div>
     );
   }
-  const imageUrl = `https://res.cloudinary.com/dbkjpn2db/image/upload/quote_images/${dailyQuote.id}.png`;
+  const imageUrl = ``;
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen py-12 px-4">
@@ -51,15 +50,15 @@ export const Home = () => {
       </div>
 
       {/* CITATION CARD */}
-      <div className="flex flex-col items-center justify-center border-2 border-black rounded-xl mb-12">
+      <div className="flex flex-col items-center justify-center border-2 border-black rounded-xl mb-12 mx-2">
         {/* IMAGE */}
-        <div className="p-4 w-[350px] h-[350px] sm:w-[450px] sm:h-[450px] md:w-[500px] md:h-[500px] lg:w-[600px] lg:h-[600px] box-border">
+        <div className="p-2 w-[300px] h-[300px] sm:w-[450px] sm:h-[450px] md:w-[500px] md:h-[500px] lg:w-[600px] lg:h-[600px] box-border">
           <img
             className="w-full h-full object-cover border-2 border-black rounded-xl"
             loading="lazy"
             src={imageUrl}
             onError={(e) => {
-              e.currentTarget.src = placeholder;
+              e.currentTarget.src = "/placeholder.webp";
             }}
             alt={dailyQuote.quote_text}
           />

@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { QuoteSection } from "../components/QuoteSection";
 import authors from "../assets/authors/authors";
 import { useTitle } from "../hooks";
@@ -8,6 +9,7 @@ export const AuthorQuote = () => {
   const navigate = useNavigate();
  
   // Get the initial values from location.state or use empty values as fallback
+  const state = location.state || {};
   const {
     imageIndex: stateImageIndex,
     imageUrl: stateImageUrl,
@@ -18,15 +20,38 @@ export const AuthorQuote = () => {
     nationality: stateNationality,
     domain: stateDomain,
     knownFor: stateKnownFor,
-  } = location.state || {};
+  } = state;
 
   // Get author name from URL or location.state
   const decodedPath = decodeURIComponent(location.pathname.split("/").pop());
-  const name = stateName || decodedPath;
+  const name = stateName || decodedPath.replace(/-/g, ' '); // Convertir les tirets en espaces
+  
+  // Si on a un state, c'est qu'on vient de la navigation interne, sinon on doit charger depuis l'API
+  const shouldLoadFromAPI = Object.keys(state).length === 0;
  const title = `Quoter - ${name}`;
   useTitle({ title });
   // Find the author in the authors array
-  const author = authors.find((a) => a.name === name);
+  const author = authors.find((a) => 
+    a.name.toLowerCase() === name.toLowerCase() || 
+    a.name.toLowerCase().replace(/ /g, '-') === decodedPath.toLowerCase()
+  );
+  
+  // Rediriger vers la page d'erreur si l'auteur n'est pas trouvé
+  useEffect(() => {
+    if (shouldLoadFromAPI && !author) {
+      // Vous pouvez aussi rediriger vers une page d'erreur personnalisée
+      navigate('/not-found');
+    }
+  }, [shouldLoadFromAPI, author, navigate]);
+  
+  if (!author && shouldLoadFromAPI) {
+    // Afficher un loader pendant la redirection
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+      </div>
+    );
+  }
 
 
 

@@ -1,7 +1,9 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { images } from "../assets/bg_images";
-import logo from "../assets/logo/1.png";
+import logo from "../assets/logo/1.webp";
+
+// Les images sont maintenant dans le dossier public/bg_images
+const images = Array.from({length: 10}, (_, i) => `/bg_images/${61 + i}.webp`);
 
 export const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -274,7 +276,7 @@ export const Header = () => {
         {/* MOBILE NAV */}
         <nav
           ref={menuRef}
-          className="relative z-10 flex md:hidden justify-between items-center w-full bg-white/95 backdrop-blur-sm border-2 m-2 mx-4 p-2 border-black rounded-full shadow-lg"
+          className="relative z-10 flex md:hidden justify-between items-center w-[90%] bg-white/95 backdrop-blur-sm border-2 m-2 mx-4 p-2 border-black rounded-full shadow-lg"
         >
           <Link to="/" className="transition-transform hover:scale-105">
             <img className="w-24" src={logo} alt="logo" />

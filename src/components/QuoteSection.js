@@ -1,6 +1,5 @@
 import { useGet } from "../hooks/useGet";
 import { useState, useEffect } from "react";
-import placeholder from "../assets/1.png";
 import { useDownload } from "../hooks/useDownload";
 import { useShare } from "../hooks/useShare";
 
@@ -96,7 +95,7 @@ export const QuoteSection = ({ query, name, category }) => {
                     e.currentTarget.src = `https://res.cloudinary.com/dbkjpn2db/image/upload/quote_images/${quote.id}.png`;
                   } else {
                     // Fallback also failed - use placeholder
-                    e.currentTarget.src = placeholder;
+                    e.currentTarget.src = "/placeholder.webp";
                     e.currentTarget.onerror = null; // Prevent infinite loop
                   }
                 }}
@@ -197,7 +196,7 @@ export const QuoteSection = ({ query, name, category }) => {
               <img
                 src={currentImageUrl}
                 onError={(e) => {
-                  e.currentTarget.src = placeholder;
+                  e.currentTarget.src = "/placeholder.webp";
                 }}
                 alt="Enlarged view"
                 className="max-h-full max-w-full object-contain"

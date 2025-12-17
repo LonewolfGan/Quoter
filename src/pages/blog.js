@@ -118,7 +118,7 @@ export const Blog = () => {
                   {dailyArticle.read_time} de lecture
                 </span>
               </div>
-              <h3 className="text-4xl font-bold mb-4">{dailyArticle.title}</h3>
+              <h3 className="text-4xl font-bold mb-4">{dailyArticle.title.replace(/ (:)/g, "\u00A0$1")}</h3>
               <p className="text-xl text-black mb-6">{dailyArticle.excerpt}</p>
             </div>
 
@@ -191,7 +191,7 @@ export const Blog = () => {
               )}
 
               {/* CTA */}
-              <div className="flex gap-4 pt-4 border-t-2 border-gray-200">
+              <div className="flex gap-4 pt-4 border-t-2 border-gray-200 flex-wrap">
                 <Link
                   to={(() => {
                     const matchedAuthor = authors.find(
@@ -202,7 +202,7 @@ export const Blog = () => {
                       ? `/authors/${matchedAuthor.name}`
                       : "/authors";
                   })()}
-                  className="flex-1 px-6 py-3 bg-black text-white rounded-full hover:bg-white hover:text-black hover:border-2 hover:border-black transition-colors text-center font-semibold"
+                  className="flex-1 px-6 py-3 bg-black text-white rounded-full hover:bg-white hover:text-black hover:border-2 hover:border-black transition-colors text-center font-semibold w-full"
                 >
                   Plus de{" "}
                   {authors.some(
@@ -213,7 +213,7 @@ export const Blog = () => {
                 </Link>
                 <Link
                   to={`/categories/${dailyArticle.category}`}
-                  className="flex-1 px-6 py-3 border-2 border-black rounded-full hover:bg-black hover:text-white transition-colors text-center font-semibold"
+                  className="flex-1 px-6 py-3 border-2 border-black rounded-full hover:bg-black hover:text-white transition-colors text-center font-semibold w-full"
                 >
                   Catégorie {dailyArticle.category}
                 </Link>
@@ -238,7 +238,7 @@ export const Blog = () => {
                   placeholder="Rechercher un article, auteur..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 px-6 py-3 border-2 border-black rounded-full outline-none focus:ring-2 focus:ring-black"
+                  className="flex-1 px-6 py-3 w-full border-2 border-black rounded-full outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
             </div>
