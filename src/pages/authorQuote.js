@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { QuoteSection } from "../components/QuoteSection";
-import authors from "../assets/authors/authors";
+import authors from "../../public/authors/authors";
 import { useTitle } from "../hooks";
 
 export const AuthorQuote = () => {
@@ -53,37 +53,7 @@ export const AuthorQuote = () => {
     );
   }
 
-
-
-  // Use values from location.state or from authors array with fallbacks
-  const getImageUrl = (url) => {
-    if (!url) return "";
-    
-    // If it's already a string URL, return as is
-    if (typeof url === 'string') {
-      // If it's an absolute URL, return as is
-      if (url.startsWith("http") || url.startsWith("//") || url.startsWith("data:")) {
-        return url;
-      }
-      // For relative URLs in production, prepend the public URL
-      if (process.env.NODE_ENV === "production") {
-        const publicUrl = process.env.PUBLIC_URL || '';
-        const baseUrl = publicUrl.endsWith('/') ? publicUrl : `${publicUrl}/`;
-        const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
-        return `${baseUrl}${cleanUrl}`;
-      }
-      return url;
-    }
-    
-    // For imported images (which are already processed by webpack)
-    if (typeof url === 'object' && url.default) {
-      return url.default;
-    }
-    
-    return "";
-  };
-
-  const imageUrl = getImageUrl(stateImageUrl || author?.image);
+  const imageUrl = stateImageUrl || author?.image || "";
   const imageIndex = stateImageIndex || author?.imageIndex || name;
   const bio = stateBio || author?.bio || "";
   const birth = stateBirth || author?.birth || "";

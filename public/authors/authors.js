@@ -1,53 +1,7 @@
-import Abraham_Lincoln from "./Abraham_Lincoln.webp";
-import Albert_Einstein from "./Albert_Einstein.webp";
-import Albert_Schweitzer from "./Albert_Schweitzer.webp";
-import Anais_Nin from "./Anais_Nin.webp";
-import Aristotle from "./Aristotle.webp";
-import Benjamin_Disraeli from "./Benjamin_Disraeli.webp";
-import Benjamin_Franklin from "./Benjamin_Franklin.webp";
-import Bernard_Shaw from "./Bernard_Shaw.webp";
-import Blaise_Pascal from "./Blaise_Pascal.webp";
-import Bruce_Lee from "./Bruce_Lee.webp";
-import Buddha from "./Buddha.webp";
-import Byron_Pulsifer from "./Byron_Pulsifer.webp";
-import Carl_Jung from "./Carl_Jung.webp";
-import Chinese_proverb from "./Chinese_proverb.webp";
-import Confucius from "./Confucius.webp";
-import Dalai_Lama from "./Dalai_Lama.webp";
-import Denis_Waitley from "./Denis_Waitley.webp";
-import Eleanor_Roosevelt from "./Eleanor_Roosevelt.webp";
-import Epictetus from "./Epictetus.webp";
-import Helen_Keller from "./Helen_Keller.webp";
-import Johann_Wolfgang_von_Goethe from "./Johann_Wolfgang_von_Goethe.webp";
-import John_Dewey from "./John_Dewey.webp";
-import John_Lennon from "./John_Lennon.webp";
-import Lao_Tzu from "./Lao_Tzu.webp";
-import Leonardo_da_Vinci from "./Leonardo_da_Vinci.webp";
-import Marcus_Aurelius from "./Marcus_Aurelius.webp";
-import Mark_Twain from "./Mark_Twain.webp";
-import Maya_Angelou from "./Maya_Angelou.webp";
-import Mother_Teresa from "./Mother_Teresa.webp";
-import Napoleon_Bonaparte from "./Napoleon_Bonaparte.webp";
-import Napoleon_Hill from "./Napoleon_Hill.webp";
-import Og_Mandino from "./Og_Mandino.webp";
-import Oprah_Winfrey from "./Oprah_Winfrey.webp";
-import Pema_Chodron from "./Pema_Chodron.webp";
-import Publilius_Syrus from "./Publilius_Syrus.webp";
-import Ralph_Emerson from "./Ralph_Emerson.webp";
-import Ralph_Waldo_Emerson from "./Ralph_Waldo_Emerson.webp";
-import Richard_Bach from "./Richard_Bach.webp";
-import Seneca from "./Seneca.webp";
-import Sophocles from "./Sophocles.webp";
-import Thich_Nhat_Hanh from "./Thich_Nhat_Hanh.webp";
-import Tony_Robbins from "./Tony_Robbins.webp";
-import Wayne_Dyer from "./Wayne_Dyer.webp";
-import William_Shakespeare from "./William_Shakespeare.webp";
-import Winston_Churchill from "./Winston_Churchill.webp";
-
 const authors = [
   {
     name: "Abraham Lincoln",
-    image: Abraham_Lincoln,
+    image: "/authors/Abraham_Lincoln.webp",
     bio: "Abraham Lincoln (1809–1865) était le 16e président des États-Unis (1861-1865). Il mena le pays durant la guerre de Sécession, préserva l'Union et proclama l'émancipation des esclaves, marquant l'histoire américaine.",
     birth: "1809",
     death: "1865",
@@ -57,7 +11,7 @@ const authors = [
   },
   {
     name: "Albert Einstein",
-    image: Albert_Einstein,
+    image: "/authors/Albert_Einstein.webp",
     bio: "Albert Einstein (1879–1955), physicien germano-américain, révolutionna la physique avec la relativité et E=mc². Prix Nobel 1921, il fuit le nazisme pour les États-Unis.",
     birth: "1879",
     death: "1955",
@@ -67,7 +21,7 @@ const authors = [
   },
   {
     name: "Albert Schweitzer",
-    image: Albert_Schweitzer,
+    image: "/authors/Albert_Schweitzer.webp",
     bio: "Albert Schweitzer (1875–1965) était un théologien, philosophe, médecin et musicien alsacien. Prix Nobel de la Paix 1952 pour sa philosophie du 'Respect de la vie' et son hôpital humanitaire en Afrique.",
     birth: "1875",
     death: "1965",
@@ -77,7 +31,7 @@ const authors = [
   },
   {
     name: "Anaïs Nin",
-    image: Anais_Nin,
+    image: "/authors/Anais_Nin.webp",
     bio: "Anaïs Nin (1903–1977) était une diariste, essayiste et romancière franco-cubano-américaine connue pour sa littérature érotique et ses journaux intimes couvrant des décennies.",
     birth: "1903",
     death: "1977",
@@ -87,7 +41,7 @@ const authors = [
   },
   {
     name: "Aristotle",
-    image: Aristotle,
+    image: "/authors/Aristotle.webp",
     bio: "Aristote (384–322 av. J.-C.) était un philosophe et polymath grec ancien. Élève de Platon, ses écrits sur la physique, biologie, éthique et logique influencèrent la philosophie occidentale.",
     birth: "384 av. J.-C.",
     death: "322 av. J.-C.",
@@ -97,7 +51,7 @@ const authors = [
   },
   {
     name: "Benjamin Disraeli",
-    image: Benjamin_Disraeli,
+    image: "/authors/Benjamin_Disraeli.webp",
     bio: "Benjamin Disraeli (1804–1881) était un homme d'État conservateur britannique, deux fois Premier ministre. Il créa le Parti conservateur moderne et fut un romancier reconnu.",
     birth: "1804",
     death: "1881",
@@ -107,7 +61,7 @@ const authors = [
   },
   {
     name: "Benjamin Franklin",
-    image: Benjamin_Franklin,
+    image: "/authors/Benjamin_Franklin.webp",
     bio: "Benjamin Franklin (1706–1790) était un polymath américain : inventeur, scientifique, politicien et Père fondateur des États-Unis. Célèbre pour ses expériences sur l'électricité.",
     birth: "1706",
     death: "1790",
@@ -117,7 +71,7 @@ const authors = [
   },
   {
     name: "Bernard Shaw",
-    image: Bernard_Shaw,
+    image: "/authors/Bernard_Shaw.webp",
     bio: "George Bernard Shaw (1856–1950) était un dramaturge, critique et polémiste irlandais. Auteur de plus de 60 pièces, il reçut le Nobel de littérature en 1925.",
     birth: "1856",
     death: "1950",
@@ -127,7 +81,7 @@ const authors = [
   },
   {
     name: "Blaise Pascal",
-    image: Blaise_Pascal,
+    image: "/authors/Blaise_Pascal.webp",
     bio: "Blaise Pascal (1623–1662) était un mathématicien, physicien, inventeur et philosophe catholique français. Connu pour le théorème de Pascal, les probabilités et les Pensées.",
     birth: "1623",
     death: "1662",
@@ -137,7 +91,7 @@ const authors = [
   },
   {
     name: "Bruce Lee",
-    image: Bruce_Lee,
+    image: "/authors/Bruce_Lee.webp",
     bio: "Bruce Lee (1940–1973) était un artiste martial, acteur et philosophe sino-américain. Fondateur du Jeet Kune Do, il révolutionna les arts martiaux au cinéma.",
     birth: "1940",
     death: "1973",
@@ -147,7 +101,7 @@ const authors = [
   },
   {
     name: "Buddha",
-    image: Buddha,
+    image: "/authors/Buddha.webp",
     bio: "Le Bouddha (vers 563–483 av. J.-C.), Siddhartha Gautama, fut un maître spirituel indien fondateur du bouddhisme. Il enseigna les Quatre Nobles Vérités pour mettre fin à la souffrance.",
     birth: "c. 563 av. J.-C.",
     death: "c. 483 av. J.-C.",
@@ -157,7 +111,7 @@ const authors = [
   },
   {
     name: "Byron Pulsifer",
-    image: Byron_Pulsifer,
+    image: "/authors/Byron_Pulsifer.webp",
     bio: "Byron Pulsifer est un auteur canadien contemporain, conférencier motivationnel et écrivain de développement personnel connu pour ses citations inspirantes.",
     birth: "vivant",
     death: "",
@@ -167,7 +121,7 @@ const authors = [
   },
   {
     name: "Carl Jung",
-    image: Carl_Jung,
+    image: "/authors/Carl_Jung.webp",
     bio: "Carl Jung (1875–1961) était un psychiatre et psychanalyste suisse fondateur de la psychologie analytique. Connu pour l'inconscient collectif et les archétypes.",
     birth: "1875",
     death: "1961",
@@ -177,7 +131,7 @@ const authors = [
   },
   {
     name: "Chinese Proverb",
-    image: Chinese_proverb,
+    image: "/authors/Chinese_proverb.webp",
     bio: "Les proverbes chinois sont des sayings traditionnels anonymes issus du folklore et de la philosophie chinoise, incarnant des siècles de sagesse confucéenne et taoïste.",
     birth: "",
     death: "",
@@ -187,7 +141,7 @@ const authors = [
   },
   {
     name: "Confucius",
-    image: Confucius,
+    image: "/authors/Confucius.webp",
     bio: "Confucius (551–479 av. J.-C.) était un philosophe chinois dont les idées sur l'éthique et l'harmonie sociale influencèrent l'Asie orientale via le confucianisme.",
     birth: "551 av. J.-C.",
     death: "479 av. J.-C.",
@@ -197,7 +151,7 @@ const authors = [
   },
   {
     name: "Dalai Lama",
-    image: Dalai_Lama,
+    image: "/authors/Dalai_Lama.webp",
     bio: "Le Dalaï Lama (né 1935, Tenzin Gyatso) est le 14e chef spirituel du bouddhisme tibétain. Lauréat du Nobel de la Paix, il prône la non-violence en exil.",
     birth: "1935",
     death: "vivant",
@@ -207,7 +161,7 @@ const authors = [
   },
   {
     name: "Denis Waitley",
-    image: Denis_Waitley,
+    image: "/authors/Denis_Waitley.webp",
     bio: "Denis Waitley est un conférencier motivationnel américain spécialisé dans la psychologie de la victoire, l'estime de soi et la performance optimale.",
     birth: "1933-05-29",
     death: "vivant",
@@ -217,7 +171,7 @@ const authors = [
   },
   {
     name: "Eleanor Roosevelt",
-    image: Eleanor_Roosevelt,
+    image: "/authors/Eleanor_Roosevelt.webp",
     bio: "Eleanor Roosevelt (1884–1962) fut une figure politique, diplomate et militante américaine. Première dame (1933-1945), elle contribua à la Déclaration des droits de l'homme de l'ONU.",
     birth: "1884",
     death: "1962",
@@ -227,7 +181,7 @@ const authors = [
   },
   {
     name: "Epictetus",
-    image: Epictetus,
+    image: "/authors/Epictetus.webp",
     bio: "Épictète (vers 50-135 ap. J.-C.) était un philosophe stoïcien grec, né esclave. Il enseigna la vertu, le contrôle de soi et l'acceptation du destin.",
     birth: "c. 50 ap. J.-C.",
     death: "c. 135 ap. J.-C.",
@@ -237,7 +191,7 @@ const authors = [
   },
   {
     name: "Helen Keller",
-    image: Helen_Keller,
+    image: "/authors/Helen_Keller.webp",
     bio: "Helen Keller (1880–1968) fut la première personne sourde-aveugle à obtenir un diplôme universitaire. Auteure et militante pour les droits des handicapés.",
     birth: "1880",
     death: "1968",
@@ -247,7 +201,7 @@ const authors = [
   },
   {
     name: "Johann Wolfgang von Goethe",
-    image: Johann_Wolfgang_von_Goethe,
+    image: "/authors/Johann_Wolfgang_von_Goethe.webp",
     bio: "Johann Wolfgang von Goethe (1749–1832) était un écrivain, poète et homme d'État allemand. Auteur de Faust, il influença le romantisme.",
     birth: "1749",
     death: "1832",
@@ -257,7 +211,7 @@ const authors = [
   },
   {
     name: "John Dewey",
-    image: John_Dewey,
+    image: "/authors/John_Dewey.webp",
     bio: "John Dewey (1859–1952) était un philosophe, psychologue et réformateur éducatif américain associé au pragmatisme et à l'éducation progressive.",
     birth: "1859",
     death: "1952",
@@ -267,7 +221,7 @@ const authors = [
   },
   {
     name: "John Lennon",
-    image: John_Lennon,
+    image: "/authors/John_Lennon.webp",
     bio: "John Lennon (1940–1980) était un chanteur, compositeur et militant pacifiste anglais, cofondateur des Beatles. Célèbre pour Imagine.",
     birth: "1940",
     death: "1980",
@@ -277,7 +231,7 @@ const authors = [
   },
   {
     name: "Lao Tzu",
-    image: Lao_Tzu,
+    image: "/authors/Lao_Tzu.webp",
     bio: "Lao Tseu (VIe-Ve av. J.-C.) est un philosophe chinois semi-légendaire, auteur traditionnel du Tao Te King et fondateur du taoïsme.",
     birth: "VIe-Ve av. J.-C.",
     death: "",
@@ -287,7 +241,7 @@ const authors = [
   },
   {
     name: "Leonardo da Vinci",
-    image: Leonardo_da_Vinci,
+    image: "/authors/Leonardo_da_Vinci.webp",
     bio: "Léonard de Vinci (1452–1519) était un polymath italien de la Renaissance : peintre (Mona Lisa), inventeur et scientifique.",
     birth: "1452",
     death: "1519",
@@ -297,7 +251,7 @@ const authors = [
   },
   {
     name: "Marcus Aurelius",
-    image: Marcus_Aurelius,
+    image: "/authors/Marcus_Aurelius.webp",
     bio: "Marc Aurèle (121–180 ap. J.-C.) fut empereur romain et philosophe stoïcien, auteur des Méditations sur le devoir et la vertu.",
     birth: "121",
     death: "180",
@@ -307,7 +261,7 @@ const authors = [
   },
   {
     name: "Mark Twain",
-    image: Mark_Twain,
+    image: "/authors/Mark_Twain.webp",
     bio: "Mark Twain (1835–1910), pseudonyme de Samuel Clemens, était un écrivain et humoriste américain auteur de Huckleberry Finn.",
     birth: "1835",
     death: "1910",
@@ -317,7 +271,7 @@ const authors = [
   },
   {
     name: "Maya Angelou",
-    image: Maya_Angelou,
+    image: "/authors/Maya_Angelou.webp",
     bio: "Maya Angelou (1928–2014) était une poétesse, mémorialiste et militante des droits civiques américaine, auteure de I Know Why the Caged Bird Sings.",
     birth: "1928",
     death: "2014",
@@ -327,7 +281,7 @@ const authors = [
   },
   {
     name: "Mother Teresa",
-    image: Mother_Teresa,
+    image: "/authors/Mother_Teresa.webp",
     bio: "Mère Teresa (1910–1997) était une religieuse catholique indo-albanaise fondatrice des Missionnaires de la Charité. Nobel de la Paix 1979.",
     birth: "1910",
     death: "1997",
@@ -337,7 +291,7 @@ const authors = [
   },
   {
     name: "Napoleon Bonaparte",
-    image: Napoleon_Bonaparte,
+    image: "/authors/Napoleon_Bonaparte.webp",
     bio: "Napoléon Bonaparte (1769–1821) fut un chef militaire et empereur français qui conquit l'Europe et réforma le droit avec le Code civil.",
     birth: "1769",
     death: "1821",
@@ -347,7 +301,7 @@ const authors = [
   },
   {
     name: "Napoleon Hill",
-    image: Napoleon_Hill,
+    image: "/authors/Napoleon_Hill.webp",
     bio: "Napoleon Hill (1883–1970) était un auteur américain de développement personnel, célèbre pour Think and Grow Rich.",
     birth: "1883",
     death: "1970",
@@ -357,7 +311,7 @@ const authors = [
   },
   {
     name: "Og Mandino",
-    image: Og_Mandino,
+    image: "/authors/Og_Mandino.webp",
     bio: "Og Mandino (1923–1996) était un auteur américain de livres inspirants mêlant développement personnel et spiritualité, comme The Greatest Salesman.",
     birth: "1923",
     death: "1996",
@@ -367,7 +321,7 @@ const authors = [
   },
   {
     name: "Oprah Winfrey",
-    image: Oprah_Winfrey,
+    image: "/authors/Oprah_Winfrey.webp",
     bio: "Oprah Winfrey (née 1954) est une dirigeante médiatique, animatrice et philanthrope américaine connue pour The Oprah Winfrey Show.",
     birth: "1954",
     death: "vivant",
@@ -377,7 +331,7 @@ const authors = [
   },
   {
     name: "Pema Chödrön",
-    image: Pema_Chodron,
+    image: "/authors/Pema_Chodron.webp",
     bio: "Pema Chödrön (née 1936) est une nonne bouddhiste tibétaine américaine, auteure de When Things Fall Apart sur la compassion.",
     birth: "1936",
     death: "vivant",
@@ -387,7 +341,7 @@ const authors = [
   },
   {
     name: "Publilius Syrus",
-    image: Publilius_Syrus,
+    image: "/authors/Publilius_Syrus.webp",
     bio: "Publilius Syrus (85-43 av. J.-C.) était un écrivain latin d'origine syrienne, affranchi connu pour ses maximes morales.",
     birth: "85-43 av. J.-C.",
     death: "",
@@ -397,7 +351,7 @@ const authors = [
   },
   {
     name: "Ralph Emerson",
-    image: Ralph_Emerson,
+    image: "/authors/Ralph_Emerson.webp",
     bio: "Ralph Waldo Emerson (1803–1882) était un essayiste, conférencier et poète américain leader du transcendantalisme.",
     birth: "1803",
     death: "1882",
@@ -407,7 +361,7 @@ const authors = [
   },
   {
     name: "Ralph Waldo Emerson",
-    image: Ralph_Waldo_Emerson,
+    image: "/authors/Ralph_Waldo_Emerson.webp",
     bio: "Ralph Waldo Emerson (1803–1882) était un essayiste, conférencier et poète américain leader du transcendantalisme.",
     birth: "1803",
     death: "1882",
@@ -417,7 +371,7 @@ const authors = [
   },
   {
     name: "Richard Bach",
-    image: Richard_Bach,
+    image: "/authors/Richard_Bach.webp",
     bio: "Richard Bach (né 1936) est un écrivain américain connu pour des romans inspirants comme Jonathan Livingston Seagull.",
     birth: "1936",
     death: "vivant",
@@ -427,7 +381,7 @@ const authors = [
   },
   {
     name: "Seneca",
-    image: Seneca,
+    image: "/authors/Seneca.webp",
     bio: "Sénèque le Jeune (4 av. J.-C.–65 ap. J.-C.) était un philosophe stoïcien, homme d'État et dramaturge romain.",
     birth: "4 av. J.-C.",
     death: "65 ap. J.-C.",
@@ -437,7 +391,7 @@ const authors = [
   },
   {
     name: "Sophocles",
-    image: Sophocles,
+    image: "/authors/Sophocles.webp",
     bio: "Sophocle (497–406 av. J.-C.) était un tragédien grec ancien auteur d'Œdipe Roi et Antigone.",
     birth: "497 av. J.-C.",
     death: "406 av. J.-C.",
@@ -447,7 +401,7 @@ const authors = [
   },
   {
     name: "Thich Nhat Hanh",
-    image: Thich_Nhat_Hanh,
+    image: "/authors/Thich_Nhat_Hanh.webp",
     bio: "Thich Nhat Hanh (1926–2022) était un moine bouddhiste vietnamien, militant de la paix et maître de la pleine conscience.",
     birth: "1926",
     death: "2022",
@@ -457,7 +411,7 @@ const authors = [
   },
   {
     name: "Tony Robbins",
-    image: Tony_Robbins,
+    image: "/authors/Tony_Robbins.webp",
     bio: "Tony Robbins (né 1960) est un auteur, coach et conférencier motivationnel américain connu pour ses séminaires.",
     birth: "1960",
     death: "vivant",
@@ -467,7 +421,7 @@ const authors = [
   },
   {
     name: "Wayne Dyer",
-    image: Wayne_Dyer,
+    image: "/authors/Wayne_Dyer.webp",
     bio: "Wayne Dyer (1940–2015) était un auteur et conférencier américain de développement personnel, auteur de Your Erroneous Zones.",
     birth: "1940",
     death: "2015",
@@ -477,7 +431,7 @@ const authors = [
   },
   {
     name: "William Shakespeare",
-    image: William_Shakespeare,
+    image: "/authors/William_Shakespeare.webp",
     bio: "William Shakespeare (1564–1616) était un dramaturge, poète et acteur anglais considéré comme le plus grand écrivain de langue anglaise.",
     birth: "1564",
     death: "1616",
@@ -487,7 +441,7 @@ const authors = [
   },
   {
     name: "Winston Churchill",
-    image: Winston_Churchill,
+    image: "/authors/Winston_Churchill.webp",
     bio: "Winston Churchill (1874–1965) fut un homme d'État, soldat et écrivain britannique, Premier ministre pendant la Seconde Guerre mondiale. Nobel de littérature 1953.",
     birth: "1874",
     death: "1965",

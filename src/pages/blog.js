@@ -1,6 +1,6 @@
 import { supabase } from "../utils/supabaseClient";
 import { ClipboardPen, ScrollText, Sparkles, Target } from "lucide-react";
-import authors from "../assets/authors/authors";
+import authors from "../../public/authors/authors";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuote } from "../context/QuoteContext";

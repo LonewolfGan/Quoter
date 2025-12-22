@@ -8,7 +8,7 @@ import {
   Target,
   ArrowLeft,
 } from "lucide-react";
-import authors from "../assets/authors/authors";
+import authors from "../../public/authors/authors";
 import { useTitle, useScrollToTop } from "../hooks/index";
 
 export const ArticleDetail = () => {
