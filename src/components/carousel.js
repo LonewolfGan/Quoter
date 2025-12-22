@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import authors from "../../public/authors/authors";
+import authors from "../assets/authors";
 import gsap from "gsap";
 import "../styles/carousel.css";
 

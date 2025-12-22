@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { QuoteSection } from "../components/QuoteSection";
-import authors from "../../public/authors/authors";
+import authors from "../assets/authors";
 import { useTitle } from "../hooks";
 
 export const AuthorQuote = () => {
