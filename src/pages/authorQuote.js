@@ -58,18 +58,39 @@ export const AuthorQuote = () => {
   // Use values from location.state or from authors array with fallbacks
   const getImageUrl = (url) => {
     if (!url) return "";
+    
     // If it's already an absolute URL, return as is
     if (
-      url.startsWith("http") ||
+      typeof url === 'string' && 
+      (url.startsWith("http") ||
       url.startsWith("//") ||
-      url.startsWith("data:")
+      url.startsWith("data:"))
     ) {
       return url;
     }
-    // For relative URLs in production, ensure they're served from the public directory
-    return process.env.NODE_ENV === "production"
-      ? `${window.location.origin}${url.startsWith("/") ? "" : "/"}${url}`
-      : url;
+    
+    // For imported images (which are already processed by webpack)
+    if (typeof url === 'object' && url.default) {
+      return url.default;
+    }
+    
+    // For production, use the correct path to assets
+    if (process.env.NODE_ENV === "production") {
+      // In CRA, assets are served from the root in production
+      // We need to make sure the path is relative to the public URL
+      const publicUrl = process.env.PUBLIC_URL || '';
+      const baseUrl = publicUrl.endsWith('/') ? publicUrl : `${publicUrl}/`;
+      
+      // If it's a relative path, make sure it's served from the correct location
+      if (typeof url === 'string') {
+        // Remove leading slash if present
+        const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+        return `${baseUrl}${cleanUrl}`;
+      }
+    }
+    
+    // For development or other cases, return the URL as is
+    return url;
   };
 
   const imageUrl = getImageUrl(stateImageUrl || author?.image);
