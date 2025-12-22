@@ -22,7 +22,7 @@ export const AllRoutes = () => {
       {/* Authors avec layout persistent */}
       <Route path="/authors" element={<AuthorsLayout />}>
         <Route index element={null} />{" "}
-        <Route path=":slug" element={<AuthorQuote />} />
+        <Route path=":name" element={<AuthorQuote />} />
       </Route>
 
       <Route path="/blog" element={<Blog />} />
