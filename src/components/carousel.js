@@ -33,7 +33,7 @@ export function Carousel3D({ onCardClick }) {
     // Physics constants
     const FRICTION = 0.9; // Velocity decay (0-1, lower = more friction)
     const WHEEL_SENS = 0.6; // Mouse wheel sensitivity
-    const DRAG_SENS = 3; // Drag sensitivity (increased for easier mobile swiping)
+    const DRAG_SENS = 5; // Drag sensitivity (increased for easier mobile swiping)
 
     // Visual constants
     const MAX_ROTATION = 28; // Maximum card rotation in degrees
@@ -138,7 +138,7 @@ const loader = document.getElementById('loader');
       if (!document.head) return;
 
       // Only preload the first 7 images (center + 3 on each side)
-      const PRELOAD_COUNT = Math.min(7, srcs.length);
+      const PRELOAD_COUNT = Math.min(20, srcs.length);
 
       for (let i = 0; i < PRELOAD_COUNT; i++) {
         const href = srcs[i];
@@ -146,7 +146,7 @@ const loader = document.getElementById('loader');
         link.rel = "preload";
         link.as = "image";
         link.href = href;
-        link.fetchPriority = i < 3 ? "high" : "auto";
+        link.fetchPriority = i < 20 ? "high" : "auto";
         document.head.appendChild(link);
       }
     }
@@ -156,47 +156,42 @@ const loader = document.getElementById('loader');
      * Only waits for images in the visible range to avoid blocking
      * @returns {Promise<void>}
      */
-    function waitForImages() {
-      const VISIBLE_COUNT = Math.min(5, items.length); // Wait for 5 visible images
+   function waitForImages() {
+  // ✅ Attendre TOUTES les images (pas seulement 5)
+  const promises = items.map((it) => {
+    const img = it.el.querySelector("img");
+    if (!img || img.complete) return Promise.resolve();
+    
+    return new Promise((resolve) => {
+      const done = () => resolve();
+      img.addEventListener("load", done, { once: true });
+      img.addEventListener("error", done, { once: true });
+      setTimeout(done, 5000); // Timeout de 5s max par image
+    });
+  });
 
-      const promises = items.slice(0, VISIBLE_COUNT).map((it) => {
-        const img = it.el.querySelector("img");
-        if (!img || img.complete) return Promise.resolve();
-
-        return new Promise((resolve) => {
-          const done = () => resolve();
-          img.addEventListener("load", done, { once: true });
-          img.addEventListener("error", done, { once: true });
-
-          // Timeout after 3 seconds to avoid blocking
-          setTimeout(done, 3000);
-        });
-      });
-
-      return Promise.allSettled(promises);
-    }
+  return Promise.allSettled(promises);
+}
 
     /**
      * Decode visible images to prevent jank during first interaction
      * Only decodes images that are likely to be seen immediately
      * @returns {Promise<void>}
      */
-    async function decodeAllImages() {
-      const DECODE_COUNT = Math.min(5, items.length); // Decode first 5 images
-
-      const tasks = items.slice(0, DECODE_COUNT).map((it) => {
-        const img = it.el.querySelector("img");
-        if (!img || !img.complete) return Promise.resolve();
-
-        if (typeof img.decode === "function") {
-          return img.decode().catch(() => {});
-        }
-
-        return Promise.resolve();
-      });
-
-      await Promise.allSettled(tasks);
+ async function decodeAllImages() {
+  // ✅ Décoder TOUTES les images
+  const tasks = items.map((it) => {
+    const img = it.el.querySelector("img");
+    if (!img || !img.complete) return Promise.resolve();
+    
+    if (typeof img.decode === "function") {
+      return img.decode().catch(() => {});
     }
+    return Promise.resolve();
+  });
+
+  await Promise.allSettled(tasks);
+}
 
     // ============================================================================
     // CAROUSEL SETUP
@@ -210,85 +205,46 @@ const loader = document.getElementById('loader');
       items = [];
 
       const fragment = document.createDocumentFragment();
-      const VISIBLE_RANGE = 3; // Load 3 images on each side of center initially
-      const PRIORITY_RANGE = 5; // High priority for 5 images on each side
+     /*  const VISIBLE_RANGE = 3; // Load 3 images on each side of center initially
+      const PRIORITY_RANGE = 5; // High priority for 5 images on each side */
 
-      IMAGES.forEach((src, i) => {
-        const card = document.createElement("article");
-        card.className = "card";
-        card.style.width = `${CARD_W}px`;
-        card.style.height = `${CARD_H}px`;
-        card.style.willChange = "transform"; // Force GPU compositing
+     IMAGES.forEach((src, i) => {
+  const card = document.createElement("article");
+  card.className = "card";
+  card.style.width = `${CARD_W}px`;
+  card.style.height = `${CARD_H}px`;
+  card.style.willChange = "transform";
 
-        const img = new Image();
-        img.className = "card__img";
-        img.decoding = "async";
-        img.draggable = false;
+  const img = new Image();
+  img.className = "card__img";
+  img.decoding = "async";
+  img.draggable = false;
+  
+  // ✅ CHARGEMENT IMMÉDIAT POUR TOUTES LES IMAGES
+  img.loading = "eager";
+  img.fetchPriority = "high";
+  img.src = src; // Charge immédiatement
 
-        // Determine loading priority based on position
-        // Center and nearby images get high priority
-        const distanceFromCenter = Math.min(i, IMAGES.length - i);
-        const isVisible = distanceFromCenter <= VISIBLE_RANGE;
-        const isPriority = distanceFromCenter <= PRIORITY_RANGE;
+  img.style.width = "100%";
+  img.style.height = "100%";
+  img.style.objectFit = "cover";
+  img.style.backgroundColor = "#f5f5f5";
+  img.style.transition = "opacity 0.3s ease-in-out";
+  img.style.opacity = "0";
 
-        if (isVisible) {
-          // Immediate loading for visible images
-          img.loading = "eager";
-          img.fetchPriority = "high";
-          img.src = src;
-        } else if (isPriority) {
-          // High priority but lazy for nearby images
-          img.loading = "lazy";
-          img.fetchPriority = "high";
-          img.src = src;
-        } else {
-          // Low priority lazy loading for distant images
-          img.loading = "lazy";
-          img.fetchPriority = "low";
-          // Delay loading of distant images
-          setTimeout(() => {
-            if (img.src === "") {
-              img.src = src;
-            }
-          }, 100 + (distanceFromCenter - PRIORITY_RANGE) * 50);
-        }
+  img.addEventListener("load", () => { 
+    img.style.opacity = "1"; 
+  }, { once: true });
+  
+  img.addEventListener("error", () => { 
+    img.style.opacity = "0.3"; 
+    img.style.backgroundColor = "#e8e8e8"; 
+  }, { once: true });
 
-        // Ensure image fills the card
-        img.style.width = "100%";
-        img.style.height = "100%";
-        img.style.objectFit = "cover";
-
-        // Add subtle placeholder styling while loading
-        img.style.backgroundColor = "#f5f5f5";
-        img.style.transition = "opacity 0.5s ease-in-out";
-        img.style.opacity = "0";
-
-        // Show image with fade-in when loaded
-        if (img.complete && img.naturalWidth > 0) {
-          img.style.opacity = "1";
-        } else {
-          img.addEventListener(
-            "load",
-            () => {
-              img.style.opacity = "1";
-            },
-            { once: true }
-          );
-        }
-
-        img.addEventListener(
-          "error",
-          () => {
-            img.style.opacity = "0.3";
-            img.style.backgroundColor = "#e8e8e8";
-          },
-          { once: true }
-        );
-
-        card.appendChild(img);
-        fragment.appendChild(card);
-        items.push({ el: card, x: i * STEP, imageLoaded: false });
-      });
+  card.appendChild(img);
+  fragment.appendChild(card);
+  items.push({ el: card, x: i * STEP, imageLoaded: false });
+});
 
       cardsRoot.appendChild(fragment);
     }
@@ -297,7 +253,7 @@ const loader = document.getElementById('loader');
      * Preload images progressively based on scroll position
      */
     function preloadNearbyImages(centerIndex) {
-      const PRELOAD_RANGE = 2; // Preload 2 images on each side
+      const PRELOAD_RANGE = 4; // Preload 2 images on each side
 
       for (let offset = -PRELOAD_RANGE; offset <= PRELOAD_RANGE; offset++) {
         const idx = mod(centerIndex + offset, items.length);
@@ -1100,14 +1056,14 @@ const loader = document.getElementById('loader');
 
         // Simple fade-in with slight delay
         setTimeout(() => {
-          item.el.style.transition = "opacity 0.4s ease-out";
+          item.el.style.transition = "opacity 0.3s ease-out";
           item.el.style.opacity = "1";
-        }, idx * 30);
+        }, idx * 20);
       });
 
       // Wait for fade-in to complete
       await new Promise((resolve) => {
-        setTimeout(resolve, visibleCards.length * 30 + 400);
+        setTimeout(resolve, visibleCards.length * 20 + 300);
       });
     }
 

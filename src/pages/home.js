@@ -11,8 +11,8 @@ import {
 
 export const Home = () => {
   const { dailyQuote, isLoading } = useQuote();
-  const { handleDownload } = useDownload();
-  const { handleShare } = useShare();
+  const handleDownload = useDownload();
+  const handleShare = useShare();
   const title = "Quoter - Home";
   useTitle({ title });
   if (isLoading || !dailyQuote) {
