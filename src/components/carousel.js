@@ -33,7 +33,7 @@ export function Carousel3D({ onCardClick }) {
     // Physics constants
     const FRICTION = 0.9; // Velocity decay (0-1, lower = more friction)
     const WHEEL_SENS = 0.6; // Mouse wheel sensitivity
-    const DRAG_SENS = 5; // Drag sensitivity (increased for easier mobile swiping)
+    const DRAG_SENS = 6; // Drag sensitivity (increased for easier mobile swiping)
 
     // Visual constants
     const MAX_ROTATION = 28; // Maximum card rotation in degrees
@@ -138,7 +138,7 @@ const loader = document.getElementById('loader');
       if (!document.head) return;
 
       // Only preload the first 7 images (center + 3 on each side)
-      const PRELOAD_COUNT = Math.min(20, srcs.length);
+      const PRELOAD_COUNT = Math.min(50, srcs.length);
 
       for (let i = 0; i < PRELOAD_COUNT; i++) {
         const href = srcs[i];
@@ -146,7 +146,7 @@ const loader = document.getElementById('loader');
         link.rel = "preload";
         link.as = "image";
         link.href = href;
-        link.fetchPriority = i < 20 ? "high" : "auto";
+        link.fetchPriority = i < PRELOAD_COUNT ? "high" : "auto";
         document.head.appendChild(link);
       }
     }
@@ -166,7 +166,7 @@ const loader = document.getElementById('loader');
       const done = () => resolve();
       img.addEventListener("load", done, { once: true });
       img.addEventListener("error", done, { once: true });
-      setTimeout(done, 5000); // Timeout de 5s max par image
+      setTimeout(done, 1000); // Timeout de 5s max par image
     });
   });
 
