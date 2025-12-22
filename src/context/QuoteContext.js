@@ -233,64 +233,92 @@ Format ta réponse UNIQUEMENT en JSON strict (sans texte avant ou après) :
      LOAD OR GENERATE ARTICLE
   ===================================================== */
   const loadOrGenerateArticle = useCallback(
-    async (today, quote) => {
-      // Vérifie le cache
-      const cached = localStorage.getItem("dailyArticle");
-      if (cached) {
-        try {
-          const { date, article } = JSON.parse(cached);
-          if (date === today) {
-            setDailyArticle(article);
-            return;
+  async (today, quote) => {
+    // 1. Vérifie le cache localStorage
+    const cached = localStorage.getItem("dailyArticle");
+    if (cached) {
+      try {
+        const { date, article } = JSON.parse(cached);
+        if (date === today) {
+          console.log("📦 Article trouvé dans localStorage");
+          
+          // ✅ AJOUT : Vérifier si cet article existe dans Supabase
+          const { data: existingArticle } = await supabase
+            .from("articles")
+            .select("id")
+            .eq("id", article.id)
+            .single();
+
+          // Si l'article n'existe PAS dans Supabase, l'ajouter
+          if (!existingArticle) {
+            console.log("💾 Article absent de Supabase, ajout en cours...");
+            const { error: insertError } = await supabase
+              .from("articles")
+              .insert([article]);
+
+            if (insertError) {
+              console.error("❌ Erreur lors de l'ajout:", insertError);
+            } else {
+              console.log("✅ Article ajouté à Supabase");
+            }
+          } else {
+            console.log("✅ Article déjà présent dans Supabase");
           }
-        } catch (e) {
-          localStorage.removeItem("dailyArticle");
+
+          setDailyArticle(article);
+          return;
         }
+      } catch (e) {
+        console.error("❌ Erreur cache localStorage:", e);
+        localStorage.removeItem("dailyArticle");
+      }
+    }
+
+    // 2. Vérifie dans Supabase
+    try {
+      const { data, error } = await supabase
+        .from("articles")
+        .select("*")
+        .eq("published_date", today)
+        .single();
+
+      // Article trouvé dans Supabase
+      if (data && !error) {
+        console.log("✅ Article trouvé dans Supabase");
+        setDailyArticle(data);
+        localStorage.setItem(
+          "dailyArticle",
+          JSON.stringify({ date: today, article: data })
+        );
+        return;
       }
 
-      // Vérifie dans Supabase
-      try {
-        const { data, error } = await supabase
-          .from("articles")
-          .select("*")
-          .eq("published_date", today) // ✅ Corrigé : published_date
-          .single();
-
-        // Article trouvé
-        if (data && !error) {
-          setDailyArticle(data);
-          localStorage.setItem(
-            "dailyArticle",
-            JSON.stringify({ date: today, article: data })
-          );
-          return;
-        }
-
-        // Article n'existe pas (erreur PGRST116)
-        if (error && error.code === "PGRST116") {
-          setIsGenerating(true);
-          const article = await generateArticle(quote, today);
-          setDailyArticle(article);
-          setIsGenerating(false);
-          return;
-        }
-
-        // Autre erreur
-        if (error) {
-          throw error;
-        }
-      } catch (err) {
-        console.error("❌ Erreur loadOrGenerateArticle:", err);
-
-        // En cas d'erreur, génère quand même
+      // Article n'existe pas (erreur PGRST116)
+      if (error && error.code === "PGRST116") {
+        console.log("🤖 Génération d'un nouvel article...");
         setIsGenerating(true);
         const article = await generateArticle(quote, today);
         setDailyArticle(article);
         setIsGenerating(false);
+        return;
       }
-    },
-    [generateArticle]
-  );
+
+      // Autre erreur
+      if (error) {
+        throw error;
+      }
+    } catch (err) {
+      console.error("❌ Erreur loadOrGenerateArticle:", err);
+
+      // En cas d'erreur, génère quand même
+      setIsGenerating(true);
+      const article = await generateArticle(quote, today);
+      setDailyArticle(article);
+      setIsGenerating(false);
+    }
+  },
+  [generateArticle]
+);
 
   /* =====================================================
      LOAD DAILY CONTENT

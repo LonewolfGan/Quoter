@@ -10,7 +10,7 @@ export const Blog = () => {
   const { dailyQuote, dailyArticle, isLoading, isGenerating } = useQuote();
   const [allArticles, setAllArticles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const articlesPerPage = 9;
+  const articlesPerPage = window.innerWidth < 768 ? 5 : 9;
   const [searchQuery, setSearchQuery] = useState("");
   const title = "Quoter - Blog";
   useTitle({ title });
@@ -255,9 +255,9 @@ export const Blog = () => {
                       <Link
                         key={article.id}
                         to={`/blog/${article.id}`}
-                        className="bg-white  overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group block"
+                        className="bg-white  overflow-hidden  cursor-pointer group block"
                       >
-                        <div className="p-6">
+                        <div className="p-6 h-full">
                           <div className="flex items-center justify-between mb-3">
                             <span className="text-xs text-gray-500">
                               {new Date(
