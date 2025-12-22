@@ -16,8 +16,6 @@ export const Home = () => {
   const title = "Quoter - Home";
   useTitle({ title });
   if (isLoading || !dailyQuote) {
-    console.log("isLoading", isLoading);
-    console.log("dailyQuote", dailyQuote);
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -27,7 +25,7 @@ export const Home = () => {
       </div>
     );
   }
-  const imageUrl = ``;
+  const imageUrl = `https://res.cloudinary.com/dbkjpn2db/image/upload/quote_images/${dailyQuote.id}`;
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen py-12 px-4">
