@@ -17,13 +17,13 @@ export const CategoryQuotes = () => {
   const isProduction = process.env.NODE_ENV === 'production';
   
   // En production, s'assurer que le slug est valide
-  useEffect(() => {
-    if (isProduction && !location.state?.fromInternalNav) {
-      // Vous pourriez ajouter ici une vérification supplémentaire
-      // pour valider que la catégorie existe dans votre base de données
-      console.log('Chargement de la catégorie depuis le rafraîchissement de la page');
-    }
-  }, [isProduction, location.state]);
+useEffect(() => {
+  // Si pas de state (rechargement de page), on redirige vers la page d'accueil
+  // qui redirigera vers la bonne catégorie
+  if (isProduction && !location.state?.fromInternalNav) {
+    navigate(`/?redirect=/category/${slug}`, { replace: true });
+  }
+}, [isProduction, location.state, navigate, slug]);
 
   const handleBack = () => {
     if (window.history.state && window.history.state.idx > 0) {

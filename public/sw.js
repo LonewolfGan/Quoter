@@ -1,98 +1,109 @@
-const CACHE_NAME = 'quoter-cache-v1';
+const CACHE_NAME = 'quoter-cache-v2'; // Version incrémentée
+const bgImages = Array.from({length: 10}, (_, i) => `/bg_images/${61 + i}.webp`);
 const urlsToCache = [
   '/',
   '/index.html',
-  // Les images de fond seront mises en cache dynamiquement
+  '/placeholder.webp',
+  '/manifest.json',
+  '/favicon.ico',
+  '/favicon_1.ico',
+  '/logo1.webp',
+  '/logo2.webp',
+  ...bgImages  // Ajout des images de fond
 ];
 
+// Fonction utilitaire pour filtrer les requêtes
+const shouldHandleRequest = (request) => {
+  if (request.method !== 'GET') return false;
+
+  try {
+    const url = new URL(request.url);
+
+    // Ne gérer que http / https
+    if (!url.protocol.startsWith('http')) return false;
+
+    // Ignorer chrome-extension et Vercel Analytics / Speed Insights
+    if (url.protocol === 'chrome-extension:') return false;
+    if (url.pathname.includes('_vercel/insights/') || url.pathname.includes('_vercel/speed-insights/')) return false;
+  } catch (err) {
+    return false; // URL invalide
+  }
+
+  return true;
+};
+
+// Install event : pré-cache les assets statiques
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(urlsToCache);
-      })
+      .then((cache) => cache.addAll(urlsToCache))
+      .then(() => self.skipWaiting())
   );
 });
 
+// Fetch event : stratégie cache dynamique pour images + network-first pour les autres
 self.addEventListener('fetch', (event) => {
-  // Gestion spéciale pour les images
-  if (event.request.url.endsWith('.webp') || 
-      event.request.url.endsWith('.png') || 
-      event.request.url.endsWith('.jpg') || 
-      event.request.url.endsWith('.jpeg')) {
-    
+  if (!shouldHandleRequest(event.request)) return;
+
+  const isImageRequest = /\.(webp|png|jpg|jpeg|gif|svg)$/i.test(event.request.url);
+
+  if (isImageRequest) {
+    // Cache-first pour les images
     event.respondWith(
-      caches.match(event.request)
-        .then((response) => {
-          // Si l'image est en cache, on la retourne
-          if (response) {
-            return response;
-          }
-          
-          // Sinon, on la récupère en ligne et on la met en cache
-          return fetch(event.request)
-            .then((response) => {
-              // Vérifier que la réponse est valide
-              if (!response || response.status !== 200 || response.type !== 'basic') {
-                return response;
-              }
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse;
 
-              // Cloner la réponse car elle est un stream et ne peut être utilisée qu'une fois
-              const responseToCache = response.clone();
+        return fetch(event.request).then((response) => {
+          if (!response || response.status !== 200 || response.type !== 'basic') return response;
 
-              caches.open(CACHE_NAME)
-                .then((cache) => {
-                  cache.put(event.request, responseToCache);
-                });
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            try {
+              cache.put(event.request, responseToCache);
+            } catch (err) {
+              console.warn('Impossible de mettre en cache l’image :', event.request.url, err);
+            }
+          });
 
-              return response;
-            });
-        })
-        .catch(() => {
-          // En cas d'erreur (hors ligne), on peut retourner une image de secours
-          // ou laisser l'erreur se propager
-          return caches.match('/placeholder.webp');
-        })
+          return response;
+        }).catch(() => caches.match('/placeholder.webp'));
+      })
     );
   } else {
-    // Pour les autres requêtes, stratégie réseau d'abord, puis cache
+    // Network-first pour tout le reste
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          // Vérifier que la réponse est valide
           if (response && response.status === 200) {
-            // Mettre en cache la réponse pour les requêtes GET
-            if (event.request.method === 'GET') {
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME)
-                .then((cache) => {
-                  cache.put(event.request, responseToCache);
-                });
-            }
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              try {
+                cache.put(event.request, responseToCache);
+              } catch (err) {
+                console.warn('Impossible de mettre en cache la ressource :', event.request.url, err);
+              }
+            });
           }
           return response;
         })
-        .catch(() => {
-          // En cas d'erreur, essayer de retourner depuis le cache
-          return caches.match(event.request);
-        })
+        .catch(() => caches.match(event.request))
     );
   }
 });
 
-// Nettoyer les anciens caches
+// Activate event : nettoyage des anciens caches
 self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+          if (!cacheWhitelist.includes(cacheName)) {
             return caches.delete(cacheName);
           }
-          return null;
         })
-      );
-    })
+      )
+    )
   );
+  self.clients.claim();
 });
