@@ -149,11 +149,8 @@ Format ta réponse UNIQUEMENT en JSON strict (sans texte avant ou après) :
   const cleaned = content.replace(/```json\n?|\n?```/g, "").trim();
   const articleData = JSON.parse(cleaned);
 
-  // Génère un ID unique basé sur la date et la quote
-  const articleId = `${today}-${quote.id}`;
-
   return {
-    id: articleId,
+    id: quote.id,
     type: "analysis",
     title: articleData.title,
     excerpt: articleData.excerpt,
