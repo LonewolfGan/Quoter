@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
 
   try {
     const today = new Date().toISOString().split("T")[0];
-    console.log(`🕐 Cron job lancé pour ${today}`);
+    console.log(`Cron job lancé pour ${today}`);
 
     // 1. Récupère la quote du jour
     const { count, error: countError } = await supabase
@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
 
     if (quoteError) throw quoteError;
 
-    console.log(`✅ Quote récupérée: "${quote.quote_text}"`);
+    console.log(`Quote récupérée: "${quote.quote_text}"`);
 
     // 2. Vérifie si l'article existe déjà
     const { data: existingArticle } = await supabase
@@ -46,7 +46,7 @@ module.exports = async (req, res) => {
       .maybeSingle();
 
     if (existingArticle) {
-      console.log("ℹ️ Article déjà existant");
+      console.log("Article déjà existant");
       return res.status(200).json({
         message: "Article already exists for today",
         quote: quote.quote_text,
@@ -55,7 +55,7 @@ module.exports = async (req, res) => {
     }
 
     // 3. Génère l'article avec Groq
-    console.log("🤖 Génération de l'article...");
+    console.log("Génération de l'article...");
     const article = await generateArticle(quote, today);
 
     // 4. Sauvegarde dans Supabase
@@ -67,7 +67,7 @@ module.exports = async (req, res) => {
 
     if (saveError) throw saveError;
 
-    console.log(`✅ Article généré et sauvegardé: "${savedArticle.title}"`);
+    console.log(`Article généré et sauvegardé: "${savedArticle.title}"`);
 
     return res.status(200).json({
       success: true,

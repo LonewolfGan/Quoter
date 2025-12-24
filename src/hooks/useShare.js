@@ -21,7 +21,7 @@ export const useShare = () => {
           });
         }
       } catch (error) {
-        console.log("Error sharing", error);
+        console.error("Error sharing", error);
       }
     } else {
       alert("Le partage n'est pas supporté sur cet appareil.");

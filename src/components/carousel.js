@@ -33,7 +33,7 @@ export function Carousel3D({ onCardClick }) {
     // Physics constants
     const FRICTION = 0.9; // Velocity decay (0-1, lower = more friction)
     const WHEEL_SENS = 0.6; // Mouse wheel sensitivity
-    const DRAG_SENS = 6; // Drag sensitivity (increased for easier mobile swiping)
+    const DRAG_SENS = 15; // Drag sensitivity (increased for easier mobile swiping)
 
     // Visual constants
     const MAX_ROTATION = 28; // Maximum card rotation in degrees
@@ -156,42 +156,42 @@ const loader = document.getElementById('loader');
      * Only waits for images in the visible range to avoid blocking
      * @returns {Promise<void>}
      */
-   function waitForImages() {
-  // ✅ Attendre TOUTES les images (pas seulement 5)
-  const promises = items.map((it) => {
-    const img = it.el.querySelector("img");
-    if (!img || img.complete) return Promise.resolve();
-    
-    return new Promise((resolve) => {
-      const done = () => resolve();
-      img.addEventListener("load", done, { once: true });
-      img.addEventListener("error", done, { once: true });
-      setTimeout(done, 1000); // Timeout de 5s max par image
-    });
-  });
+    function waitForImages() {
+      // ✅ Attendre TOUTES les images (pas seulement 5)
+      const promises = items.map((it) => {
+        const img = it.el.querySelector("img");
+        if (!img || img.complete) return Promise.resolve();
 
-  return Promise.allSettled(promises);
-}
+        return new Promise((resolve) => {
+          const done = () => resolve();
+          img.addEventListener("load", done, { once: true });
+          img.addEventListener("error", done, { once: true });
+          setTimeout(done, 1000); // Timeout de 5s max par image
+        });
+      });
+
+      return Promise.allSettled(promises);
+    }
 
     /**
      * Decode visible images to prevent jank during first interaction
      * Only decodes images that are likely to be seen immediately
      * @returns {Promise<void>}
      */
- async function decodeAllImages() {
-  // ✅ Décoder TOUTES les images
-  const tasks = items.map((it) => {
-    const img = it.el.querySelector("img");
-    if (!img || !img.complete) return Promise.resolve();
-    
-    if (typeof img.decode === "function") {
-      return img.decode().catch(() => {});
-    }
-    return Promise.resolve();
-  });
+    async function decodeAllImages() {
+      // ✅ Décoder TOUTES les images
+      const tasks = items.map((it) => {
+        const img = it.el.querySelector("img");
+        if (!img || !img.complete) return Promise.resolve();
 
-  await Promise.allSettled(tasks);
-}
+        if (typeof img.decode === "function") {
+          return img.decode().catch(() => {});
+        }
+        return Promise.resolve();
+      });
+
+      await Promise.allSettled(tasks);
+    }
 
     // ============================================================================
     // CAROUSEL SETUP
@@ -205,46 +205,54 @@ const loader = document.getElementById('loader');
       items = [];
 
       const fragment = document.createDocumentFragment();
-     /*  const VISIBLE_RANGE = 3; // Load 3 images on each side of center initially
+      /*  const VISIBLE_RANGE = 3; // Load 3 images on each side of center initially
       const PRIORITY_RANGE = 5; // High priority for 5 images on each side */
 
-     IMAGES.forEach((src, i) => {
-  const card = document.createElement("article");
-  card.className = "card";
-  card.style.width = `${CARD_W}px`;
-  card.style.height = `${CARD_H}px`;
-  card.style.willChange = "transform";
+      IMAGES.forEach((src, i) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.style.width = `${CARD_W}px`;
+        card.style.height = `${CARD_H}px`;
+        card.style.willChange = "transform";
 
-  const img = new Image();
-  img.className = "card__img";
-  img.decoding = "async";
-  img.draggable = false;
-  
-  // ✅ CHARGEMENT IMMÉDIAT POUR TOUTES LES IMAGES
-  img.loading = "eager";
-  img.fetchPriority = "high";
-  img.src = src; // Charge immédiatement
+        const img = new Image();
+        img.className = "card__img";
+        img.decoding = "async";
+        img.draggable = false;
 
-  img.style.width = "100%";
-  img.style.height = "100%";
-  img.style.objectFit = "cover";
-  img.style.backgroundColor = "#f5f5f5";
-  img.style.transition = "opacity 0.3s ease-in-out";
-  img.style.opacity = "0";
+        // ✅ CHARGEMENT IMMÉDIAT POUR TOUTES LES IMAGES
+        img.loading = "eager";
+        img.fetchPriority = "high";
+        img.src = src; // Charge immédiatement
 
-  img.addEventListener("load", () => { 
-    img.style.opacity = "1"; 
-  }, { once: true });
-  
-  img.addEventListener("error", () => { 
-    img.style.opacity = "0.3"; 
-    img.style.backgroundColor = "#e8e8e8"; 
-  }, { once: true });
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
+        img.style.backgroundColor = "#f5f5f5";
+        img.style.transition = "opacity 0.3s ease-in-out";
+        img.style.opacity = "0";
 
-  card.appendChild(img);
-  fragment.appendChild(card);
-  items.push({ el: card, x: i * STEP, imageLoaded: false });
-});
+        img.addEventListener(
+          "load",
+          () => {
+            img.style.opacity = "1";
+          },
+          { once: true }
+        );
+
+        img.addEventListener(
+          "error",
+          () => {
+            img.style.opacity = "0.3";
+            img.style.backgroundColor = "#e8e8e8";
+          },
+          { once: true }
+        );
+
+        card.appendChild(img);
+        fragment.appendChild(card);
+        items.push({ el: card, x: i * STEP, imageLoaded: false });
+      });
 
       cardsRoot.appendChild(fragment);
     }
