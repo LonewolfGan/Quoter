@@ -31,9 +31,9 @@ export function Carousel3D({ onCardClick }) {
     // ============================================================================
 
     // Physics constants
-    const FRICTION = 0.9; // Velocity decay (0-1, lower = more friction)
-    const WHEEL_SENS = 0.6; // Mouse wheel sensitivity
-    const DRAG_SENS = 15; // Drag sensitivity (increased for easier mobile swiping)
+    const FRICTION = 0.92; // Less friction for more fluid movement
+    const WHEEL_SENS = 0.8; // Increased sensitivity
+    const DRAG_SENS = 18; // Increased drag sensitivity
 
     // Visual constants
     const MAX_ROTATION = 28; // Maximum card rotation in degrees
@@ -137,8 +137,8 @@ const loader = document.getElementById('loader');
     function preloadImageLinks(srcs) {
       if (!document.head) return;
 
-      // Only preload the first 7 images (center + 3 on each side)
-      const PRELOAD_COUNT = Math.min(50, srcs.length);
+      // Only preload the first 10 images to save bandwidth
+      const PRELOAD_COUNT = Math.min(10, srcs.length);
 
       for (let i = 0; i < PRELOAD_COUNT; i++) {
         const href = srcs[i];
@@ -157,8 +157,11 @@ const loader = document.getElementById('loader');
      * @returns {Promise<void>}
      */
     function waitForImages() {
-      // ✅ Attendre TOUTES les images (pas seulement 5)
-      const promises = items.map((it) => {
+      // Optimize: Only wait for initial visible images (first 7)
+      // The rest will load in background
+      const CHECK_COUNT = Math.min(7, items.length);
+
+      const promises = items.slice(0, CHECK_COUNT).map((it) => {
         const img = it.el.querySelector("img");
         if (!img || img.complete) return Promise.resolve();
 
@@ -166,7 +169,7 @@ const loader = document.getElementById('loader');
           const done = () => resolve();
           img.addEventListener("load", done, { once: true });
           img.addEventListener("error", done, { once: true });
-          setTimeout(done, 1000); // Timeout de 5s max par image
+          setTimeout(done, 1000); // Timeout de 1s max par image
         });
       });
 
@@ -179,8 +182,10 @@ const loader = document.getElementById('loader');
      * @returns {Promise<void>}
      */
     async function decodeAllImages() {
-      // ✅ Décoder TOUTES les images
-      const tasks = items.map((it) => {
+      // Optimize: Only decode initial visible images
+      const DECODE_COUNT = Math.min(7, items.length);
+
+      const tasks = items.slice(0, DECODE_COUNT).map((it) => {
         const img = it.el.querySelector("img");
         if (!img || !img.complete) return Promise.resolve();
 
@@ -220,10 +225,17 @@ const loader = document.getElementById('loader');
         img.decoding = "async";
         img.draggable = false;
 
-        // ✅ CHARGEMENT IMMÉDIAT POUR TOUTES LES IMAGES
-        img.loading = "eager";
-        img.fetchPriority = "high";
-        img.src = src; // Charge immédiatement
+        // Optimize loading strategy
+        // Load first 5 images eagerly, others lazily
+        if (i < 5) {
+          img.loading = "eager";
+          img.fetchPriority = "high";
+        } else {
+          img.loading = "lazy";
+          img.fetchPriority = "auto";
+        }
+
+        img.src = src;
 
         img.style.width = "100%";
         img.style.height = "100%";
@@ -277,12 +289,14 @@ const loader = document.getElementById('loader');
           continue;
         }
 
+        // Boost priority for nearby images
+        img.loading = "eager";
+        img.fetchPriority = "high";
+
         // If image hasn't started loading, start it
         if (!img.src || img.src === "") {
           if (idx >= 0 && idx < IMAGES.length) {
             img.src = IMAGES[idx];
-            img.loading = "lazy";
-            img.fetchPriority = "high";
           }
         }
 
@@ -396,6 +410,15 @@ const loader = document.getElementById('loader');
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
         const pos = positions[i];
+
+        // Optimization: Skip rendering if far off-screen to improve performance
+        // Only render cards within reasonable view distance
+        if (Math.abs(pos) > VW_HALF * 2.5) {
+          if (it.el.style.display !== "none") it.el.style.display = "none";
+          continue;
+        }
+        if (it.el.style.display === "none") it.el.style.display = "block";
+
         const norm = Math.max(-1, Math.min(1, pos / VW_HALF));
         const { transform, z } = transformForScreenX(pos);
 
@@ -715,34 +738,9 @@ const loader = document.getElementById('loader');
     }
 
     /**
-     * Set the active gradient based on the centered card
-     * @param {number} idx - Card index
+     * Update the target gradient colors
      */
-    function setActiveGradient(idx) {
-      if (!bgCtx || idx < 0 || idx >= items.length || idx === activeIndex)
-        return;
-
-      activeIndex = idx;
-
-      // Extract color on demand if not already extracted
-      const img = items[idx].el.querySelector("img");
-      if (img && img.complete && img.naturalWidth > 0) {
-        // Check if we still have fallback colors (simple heuristic)
-        const currentPal = gradPalette[idx];
-        if (
-          !currentPal ||
-          (currentPal.c1 &&
-            currentPal.c1[0] === currentPal.c1[1] &&
-            currentPal.c1[1] === currentPal.c1[2])
-        ) {
-          extractColorForIndex(idx);
-        }
-      }
-
-      const pal = gradPalette[idx] || {
-        c1: [240, 240, 240],
-        c2: [235, 235, 235],
-      };
+    function updateGradientTarget(pal) {
       const to = {
         r1: pal.c1[0],
         g1: pal.c1[1],
@@ -763,6 +761,51 @@ const loader = document.getElementById('loader');
       } else {
         Object.assign(gradCurrent, to);
       }
+    }
+
+    /**
+     * Set the active gradient based on the centered card
+     * @param {number} idx - Card index
+     */
+    function setActiveGradient(idx) {
+      if (!bgCtx || idx < 0 || idx >= items.length || idx === activeIndex)
+        return;
+
+      activeIndex = idx;
+
+      // Check if we need to extract colors (if we only have fallback)
+      const img = items[idx].el.querySelector("img");
+      const currentPal = gradPalette[idx];
+      const isFallback =
+        !currentPal ||
+        (currentPal.c1 &&
+          currentPal.c1[0] === currentPal.c1[1] &&
+          currentPal.c1[1] === currentPal.c1[2]);
+
+      if (img && img.complete && img.naturalWidth > 0 && isFallback) {
+        // Schedule extraction to avoid blocking the main thread during scroll
+        const runExtraction = () => {
+          extractColorForIndex(idx);
+          // Only update if this is still the active card
+          if (activeIndex === idx) {
+            updateGradientTarget(gradPalette[idx]);
+          }
+        };
+
+        if (window.requestIdleCallback) {
+          window.requestIdleCallback(runExtraction);
+        } else {
+          setTimeout(runExtraction, 50);
+        }
+      }
+
+      // Apply current palette immediately (might be fallback)
+      const pal = gradPalette[idx] || {
+        c1: [240, 240, 240],
+        c2: [235, 235, 235],
+      };
+
+      updateGradientTarget(pal);
     }
 
     // ============================================================================
