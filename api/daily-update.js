@@ -1,15 +1,12 @@
 const { createClient } = require("@supabase/supabase-js");
-const fetch = require("node-fetch");
 
-// ==================== SUPABASE CLIENT ====================
 const supabase = createClient(
   process.env.REACT_APP_SUPABASE_URL,
   process.env.REACT_APP_SUPABASE_KEY
 );
 
-// ==================== CRON HANDLER ====================
 module.exports = async (req, res) => {
-  // 🔐 Sécurité Cron
+  // Sécurité : vérifie le token secret
   const authHeader = req.headers.authorization;
   if (!authHeader || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -17,19 +14,15 @@ module.exports = async (req, res) => {
 
   try {
     const today = new Date().toISOString().split("T")[0];
-    console.log(`🕐 Cron lancé pour ${today}`);
+    console.log(`🕐 Cron job lancé pour ${today}`);
 
-    // ==================== 1. COUNT QUOTES ====================
+    // 1. Récupère la quote du jour
     const { count, error: countError } = await supabase
       .from("quotes")
       .select("*", { count: "exact", head: true });
 
     if (countError) throw countError;
-    if (!count || count === 0) {
-      throw new Error("Aucune citation disponible");
-    }
 
-    // ==================== 2. SELECT QUOTE ====================
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 0);
     const dayOfYear = Math.floor((now - startOfYear) / 86400000);
@@ -39,42 +32,42 @@ module.exports = async (req, res) => {
       .from("quotes")
       .select("*")
       .range(index, index)
-      .single(); // ✅ OBLIGATOIRE
+      .single();
 
     if (quoteError) throw quoteError;
-    console.log(`✅ Quote: "${quote.quote_text}"`);
 
-    // ==================== 3. CHECK ARTICLE EXISTENCE ====================
-    const { data: existingArticle, error: articleCheckError } = await supabase
+    console.log(`✅ Quote récupérée: "${quote.quote_text}"`);
+
+    // 2. Vérifie si l'article existe déjà
+    const { data: existingArticle } = await supabase
       .from("articles")
       .select("*")
       .eq("published_date", today)
-      .maybeSingle(); // ✅ IMPORTANT
-
-    if (articleCheckError) throw articleCheckError;
+      .maybeSingle();
 
     if (existingArticle) {
       console.log("ℹ️ Article déjà existant");
       return res.status(200).json({
-        message: "Article already exists",
+        message: "Article already exists for today",
+        quote: quote.quote_text,
         article: existingArticle.title,
       });
     }
 
-    // ==================== 4. GENERATE ARTICLE ====================
-    console.log("🤖 Génération de l’article...");
+    // 3. Génère l'article avec Groq
+    console.log("🤖 Génération de l'article...");
     const article = await generateArticle(quote, today);
 
-    // ==================== 5. SAVE ARTICLE ====================
+    // 4. Sauvegarde dans Supabase
     const { data: savedArticle, error: saveError } = await supabase
       .from("articles")
       .insert([article])
       .select()
-      .single(); // ✅ OBLIGATOIRE
+      .single();
 
     if (saveError) throw saveError;
 
-    console.log(`✅ Article sauvegardé: "${savedArticle.title}"`);
+    console.log(`✅ Article généré et sauvegardé: "${savedArticle.title}"`);
 
     return res.status(200).json({
       success: true,
@@ -89,8 +82,7 @@ module.exports = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("❌ Cron error:", error);
-
+    console.error("❌ Erreur cron job:", error);
     return res.status(500).json({
       error: error.message,
       stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
@@ -98,9 +90,9 @@ module.exports = async (req, res) => {
   }
 };
 
-// ==================== GROQ GENERATION ====================
 async function generateArticle(quote, today) {
-  const apiKey = process.env.GROQ_API_KEY;
+  const apiKey = process.env.REACT_APP_GROQ_API_KEY;
+
   if (!apiKey) {
     throw new Error("GROQ_API_KEY manquante");
   }
@@ -115,43 +107,53 @@ async function generateArticle(quote, today) {
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        temperature: 0.7,
         messages: [
           {
             role: "user",
-            content: `Écris un article de blog en français à partir de cette citation :
+            content: `Écris un article de blog complet et captivant en français sur cette citation :
 
 "${quote.quote_text}" - ${quote.quote_author}
 
-Réponds UNIQUEMENT en JSON strict :
+L'article doit contenir :
+1. Un titre accrocheur et inspirant
+2. Une introduction engageante (2-3 phrases)
+3. Le contexte historique de la citation
+4. 4 points clés d'analyse ou d'application pratique
+5. Un exercice pratique pour le lecteur
+6. Une conclusion inspirante
+
+Format ta réponse UNIQUEMENT en JSON strict (sans texte avant ou après) :
 {
-  "title": "",
-  "excerpt": "",
-  "intro": "",
-  "context": "",
-  "points": ["", "", "", ""],
-  "exercise": "",
-  "conclusion": ""
+  "title": "Titre de l'article",
+  "excerpt": "Court résumé en 1-2 phrases",
+  "intro": "Introduction",
+  "context": "Contexte historique",
+  "points": ["Point 1", "Point 2", "Point 3", "Point 4"],
+  "exercise": "Exercice pratique",
+  "conclusion": "Conclusion"
 }`,
           },
         ],
+        temperature: 0.7,
       }),
     }
   );
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Groq API error ${response.status}: ${errorText}`);
+    throw new Error(`Groq API error: ${response.status} - ${errorText}`);
   }
 
   const data = await response.json();
-  const raw = data.choices[0].message.content;
-
-  const cleaned = raw.replace(/```json|```/g, "").trim();
+  const content = data.choices[0].message.content;
+  const cleaned = content.replace(/```json\n?|\n?```/g, "").trim();
   const articleData = JSON.parse(cleaned);
 
+  // Génère un ID unique basé sur la date et la quote
+  const articleId = `${today}-${quote.id}`;
+
   return {
-    id: `${today}-${quote.id}`,
+    id: articleId,
     type: "analysis",
     title: articleData.title,
     excerpt: articleData.excerpt,
