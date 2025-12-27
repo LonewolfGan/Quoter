@@ -118,7 +118,9 @@ export const Blog = () => {
                   {dailyArticle.read_time} de lecture
                 </span>
               </div>
-              <h3 className="text-4xl font-bold mb-4">{dailyArticle.title.replace(/ (:)/g, "\u00A0$1")}</h3>
+              <h3 className="text-4xl font-bold mb-4">
+                {dailyArticle.title.replace(/ (:)/g, "\u00A0$1")}
+              </h3>
               <p className="text-xl text-black mb-6">{dailyArticle.excerpt}</p>
             </div>
 
@@ -271,7 +273,9 @@ export const Blog = () => {
                             <span className="text-xs text-gray-500">6 min</span>
                           </div>
                           <h3 className="text-xl font-bold mb-2 group-hover:underline ">
-                            {article.title.replace(/ (:)/g, "\u00A0$1")}
+                            {article.title
+                              .replace(/ (:)/g, "\u00A0$1")
+                              .replace(/ (-)/g, "\u00A0$1")}
                           </h3>
                           <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                             {article.excerpt}
