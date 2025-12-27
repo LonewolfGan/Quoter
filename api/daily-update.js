@@ -13,14 +13,23 @@ module.exports = async (req, res) => {
     ip: req.headers["x-forwarded-for"] || req.headers["x-real-ip"],
     userAgent: req.headers["user-agent"],
     hasAuth: !!req.headers.authorization,
+    hasToken: !!req.query.token,
   };
 
   console.log("📥 Requête reçue:", JSON.stringify(logData, null, 2));
 
-  // Sécurité : vérifie le token secret
+  // Sécurité : vérifie le token secret (header OU query parameter)
   const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const tokenParam = req.query.token;
+  const expectedToken = process.env.CRON_SECRET;
+
+  const isValidHeader = authHeader === `Bearer ${expectedToken}`;
+  const isValidQuery = tokenParam === expectedToken;
+
+  if (!isValidHeader && !isValidQuery) {
     console.error("❌ Authentification échouée");
+    console.error("Header:", authHeader);
+    console.error("Query token:", tokenParam);
     return res.status(401).json({ error: "Unauthorized" });
   }
 
@@ -105,7 +114,7 @@ module.exports = async (req, res) => {
 };
 
 async function generateArticle(quote, today) {
-  const apiKey = process.env.REACT_APP_GROQ_API_KEY; // ✅ Sans REACT_APP_
+  const apiKey = process.env.REACT_APP_GROQ_API_KEY;
 
   if (!apiKey) {
     throw new Error("GROQ_API_KEY manquante");
