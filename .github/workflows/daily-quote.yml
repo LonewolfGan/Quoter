@@ -3,7 +3,7 @@ name: Daily Quote Generation
 on:
   schedule:
     # Tous les jours à minuit UTC (1h du matin heure Casablanca en hiver)
-    - cron: "0 0 * * *"
+    - cron: "* * * * *"
   workflow_dispatch: # Bouton pour lancer manuellement
 
 jobs:
