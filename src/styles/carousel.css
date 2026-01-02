@@ -57,7 +57,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   user-select: none;
-  transition: filter 0.3s ease, box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease; /* Removed filter transition to prevent lag */
   pointer-events: auto; /* Re-enable pointer events for cards */
 }
 

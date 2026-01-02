@@ -2,42 +2,17 @@ const { createClient } = require("@supabase/supabase-js");
 
 const supabase = createClient(
   process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_KEY // ✅ Corrigé
+  process.env.REACT_APP_SUPABASE_KEY
 );
 
 module.exports = async (req, res) => {
-  // Log de debug
-  const logData = {
-    timestamp: new Date().toISOString(),
-    method: req.method,
-    ip: req.headers["x-forwarded-for"] || req.headers["x-real-ip"],
-    userAgent: req.headers["user-agent"],
-    hasAuth: !!req.headers.authorization,
-    hasToken: !!req.query.token,
-  };
-
-  console.log("📥 Requête reçue:", JSON.stringify(logData, null, 2));
-
-  // Sécurité : vérifie le token secret (header OU query parameter)
-  const authHeader = req.headers.authorization;
   const tokenParam = req.query.token;
-  const expectedToken = process.env.CRON_SECRET;
-
-  const isValidHeader = authHeader === `Bearer ${expectedToken}`;
-  const isValidQuery = tokenParam === expectedToken;
-
-  if (!isValidHeader && !isValidQuery) {
-    console.error("❌ Authentification échouée");
-    console.error("Header:", authHeader);
-    console.error("Query token:", tokenParam);
+  if (tokenParam !== process.env.CRON_SECRET) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  console.log("✅ Authentification réussie");
-
   try {
     const today = new Date().toISOString().split("T")[0];
-    console.log(`🕐 Cron job lancé pour ${today}`);
 
     // 1. Récupère la quote du jour
     const { count, error: countError } = await supabase
@@ -59,8 +34,6 @@ module.exports = async (req, res) => {
 
     if (quoteError) throw quoteError;
 
-    console.log(`✅ Quote récupérée: "${quote.quote_text}"`);
-
     // 2. Vérifie si l'article existe déjà
     const { data: existingArticle } = await supabase
       .from("articles")
@@ -69,16 +42,13 @@ module.exports = async (req, res) => {
       .maybeSingle();
 
     if (existingArticle) {
-      console.log("ℹ️ Article déjà existant");
       return res.status(200).json({
         message: "Article already exists for today",
-        quote: quote.quote_text,
         article: existingArticle.title,
       });
     }
 
     // 3. Génère l'article avec Groq
-    console.log("🤖 Génération de l'article...");
     const article = await generateArticle(quote, today);
 
     // 4. Sauvegarde dans Supabase
@@ -90,26 +60,15 @@ module.exports = async (req, res) => {
 
     if (saveError) throw saveError;
 
-    console.log(`✅ Article généré et sauvegardé: "${savedArticle.title}"`);
-
     return res.status(200).json({
       success: true,
       date: today,
-      quote: {
-        text: quote.quote_text,
-        author: quote.quote_author,
-      },
-      article: {
-        id: savedArticle.id,
-        title: savedArticle.title,
-      },
+      quote: quote.quote_text,
+      article: savedArticle.title,
     });
   } catch (error) {
-    console.error("❌ Erreur cron job:", error);
-    return res.status(500).json({
-      error: error.message,
-      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
-    });
+    console.error("Erreur:", error);
+    return res.status(500).json({ error: error.message });
   }
 };
 

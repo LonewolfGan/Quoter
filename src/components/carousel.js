@@ -1,20 +1,16 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import authors from "../assets/authors";
-import gsap from "gsap";
 import "../styles/carousel.css";
 
 export function Carousel3D({ onCardClick }) {
   const stageRef = useRef(null);
   const cardsRef = useRef(null);
-  const bgRef = useRef(null);
   const loaderRef = useRef(null);
   const carouselControlsRef = useRef(null); // Ref to expose navigation controls
 
   useEffect(() => {
     const stage = stageRef.current;
     const cardsRoot = cardsRef.current;
-    const bgCanvas = bgRef.current;
-    const bgCtx = bgCanvas?.getContext("2d", { alpha: false });
     const loader = loaderRef.current;
 
     const IMAGES = authors.map((author) => author.image);
@@ -22,8 +18,7 @@ export function Carousel3D({ onCardClick }) {
 
     /*
   Infinite Gradient 3D Carousel
-  A smooth, infinite-scrolling 3D carousel with dynamic gradient backgrounds
-  that change based on the active card's colors.
+  A smooth, infinite-scrolling 3D carousel
 */
 
     // ============================================================================
@@ -34,6 +29,7 @@ export function Carousel3D({ onCardClick }) {
     const FRICTION = 0.92; // Less friction for more fluid movement
     const WHEEL_SENS = 0.8; // Increased sensitivity
     const DRAG_SENS = 18; // Increased drag sensitivity
+    const AUTO_SPEED = 150; // Auto-scroll speed (pixels per second) - Increased for fluidity
 
     // Visual constants
     const MAX_ROTATION = 28; // Maximum card rotation in degrees
@@ -61,7 +57,6 @@ const loader = document.getElementById('loader');
     let items = []; // Array of {el: HTMLElement, x: number}
     let positions = []; // Float32Array for wrapped positions
     let activeIndex = -1; // Currently centered card index
-    let isEntering = true; // Prevents interaction during entry animation
 
     // Layout measurements
     let CARD_W = 350; // Card width (measured dynamically)
@@ -73,10 +68,11 @@ const loader = document.getElementById('loader');
 
     // Physics state
     let vX = 0; // Velocity in X direction
+    let isHovered = false; // Pause auto-scroll on hover
 
     // Navigation function that will be exposed via ref
     function navigateCarousel(direction) {
-      if (isEntering) return;
+      // Allow navigation immediately
       const delta = direction === "next" ? 1 : -1;
       // Calculate velocity needed to move one full card (STEP = CARD_W + GAP)
       // With friction, we need enough velocity to travel STEP pixels
@@ -94,22 +90,7 @@ const loader = document.getElementById('loader');
 
     // Animation frame IDs
     let rafId = null; // Carousel animation frame
-    let bgRAF = null; // Background animation frame
     let lastTime = 0; // Last frame timestamp
-    let lastBgDraw = 0; // Last background draw time
-
-    // Background gradient state
-    let gradPalette = []; // Extracted colors from each image
-    let gradCurrent = {
-      // Current interpolated gradient colors
-      r1: 240,
-      g1: 240,
-      b1: 240, // First gradient color (RGB)
-      r2: 235,
-      g2: 235,
-      b2: 235, // Second gradient color (RGB)
-    };
-    let bgFastUntil = 0; // Timestamp until which to render at high FPS
 
     // ============================================================================
     // UTILITY FUNCTIONS
@@ -218,7 +199,7 @@ const loader = document.getElementById('loader');
         card.className = "card";
         card.style.width = `${CARD_W}px`;
         card.style.height = `${CARD_H}px`;
-        card.style.willChange = "transform";
+        card.style.willChange = "transform, filter";
 
         const img = new Image();
         img.className = "card__img";
@@ -411,13 +392,15 @@ const loader = document.getElementById('loader');
         const it = items[i];
         const pos = positions[i];
 
-        // Optimization: Skip rendering if far off-screen to improve performance
+        // Optimization: Use visibility instead of display to prevent layout thrashing
         // Only render cards within reasonable view distance
-        if (Math.abs(pos) > VW_HALF * 2.5) {
-          if (it.el.style.display !== "none") it.el.style.display = "none";
-          continue;
+        if (Math.abs(pos) > VW_HALF * 3) {
+          if (it.el.style.visibility !== "hidden")
+            it.el.style.visibility = "hidden";
+        } else {
+          if (it.el.style.visibility === "hidden")
+            it.el.style.visibility = "visible";
         }
-        if (it.el.style.display === "none") it.el.style.display = "block";
 
         const norm = Math.max(-1, Math.min(1, pos / VW_HALF));
         const { transform, z } = transformForScreenX(pos);
@@ -433,7 +416,7 @@ const loader = document.getElementById('loader');
 
       // Update gradient if active card changed
       if (closestIdx !== activeIndex) {
-        setActiveGradient(closestIdx);
+        activeIndex = closestIdx;
         // Preload nearby images when active card changes
         preloadNearbyImages(closestIdx);
       }
@@ -453,6 +436,11 @@ const loader = document.getElementById('loader');
 
       // Apply velocity to scroll position
       SCROLL_X = mod(SCROLL_X + vX * dt, TRACK);
+
+      // Apply auto-scroll if not interacting
+      if (!dragging && !isHovered) {
+        SCROLL_X = mod(SCROLL_X + AUTO_SPEED * dt, TRACK);
+      }
 
       // Apply friction to velocity
       const decay = Math.pow(FRICTION, dt * 60);
@@ -484,435 +472,6 @@ const loader = document.getElementById('loader');
     }
 
     // ============================================================================
-    // COLOR EXTRACTION & UTILITIES
-    // ============================================================================
-
-    /**
-     * Convert RGB to HSL color space
-     * @param {number} r - Red (0-255)
-     * @param {number} g - Green (0-255)
-     * @param {number} b - Blue (0-255)
-     * @returns {[number, number, number]} [hue (0-360), saturation (0-1), lightness (0-1)]
-     */
-    function rgbToHsl(r, g, b) {
-      r /= 255;
-      g /= 255;
-      b /= 255;
-
-      const max = Math.max(r, g, b);
-      const min = Math.min(r, g, b);
-      let h, s;
-      const l = (max + min) / 2;
-
-      if (max === min) {
-        h = 0;
-        s = 0; // Achromatic
-      } else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-        switch (max) {
-          case r:
-            h = (g - b) / d + (g < b ? 6 : 0);
-            break;
-          case g:
-            h = (b - r) / d + 2;
-            break;
-          default:
-            h = (r - g) / d + 4;
-            break;
-        }
-        h /= 6;
-      }
-
-      return [h * 360, s, l];
-    }
-
-    /**
-     * Convert HSL to RGB color space
-     * @param {number} h - Hue (0-360)
-     * @param {number} s - Saturation (0-1)
-     * @param {number} l - Lightness (0-1)
-     * @returns {[number, number, number]} [red (0-255), green (0-255), blue (0-255)]
-     */
-    function hslToRgb(h, s, l) {
-      h = ((h % 360) + 360) % 360;
-      h /= 360;
-      let r, g, b;
-
-      if (s === 0) {
-        r = g = b = l; // Achromatic
-      } else {
-        const hue2rgb = (p, q, t) => {
-          if (t < 0) t += 1;
-          if (t > 1) t -= 1;
-          if (t < 1 / 6) return p + (q - p) * 6 * t;
-          if (t < 1 / 2) return q;
-          if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-          return p;
-        };
-
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        const p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1 / 3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1 / 3);
-      }
-
-      return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-    }
-
-    /**
-     * Generate fallback colors when extraction fails
-     * @param {number} idx - Card index
-     * @returns {{c1: number[], c2: number[]}} Two RGB colors
-     */
-    function fallbackFromIndex(idx) {
-      const h = (idx * 37) % 360; // Spread hues across spectrum
-      const s = 0.65;
-      const c1 = hslToRgb(h, s, 0.52);
-      const c2 = hslToRgb(h, s, 0.72);
-      return { c1, c2 };
-    }
-
-    /**
-     * Extract dominant colors from an image using histogram analysis
-     * @param {HTMLImageElement} img - Image element to analyze
-     * @param {number} idx - Card index (for fallback)
-     * @returns {{c1: number[], c2: number[]}} Two dominant RGB colors
-     */
-    function extractColors(img, idx) {
-      try {
-        // Downscale image for faster processing
-        const MAX = 48;
-        const ratio =
-          img.naturalWidth && img.naturalHeight
-            ? img.naturalWidth / img.naturalHeight
-            : 1;
-        const tw = ratio >= 1 ? MAX : Math.max(16, Math.round(MAX * ratio));
-        const th = ratio >= 1 ? Math.max(16, Math.round(MAX / ratio)) : MAX;
-
-        // Draw image to temporary canvas
-        const canvas = document.createElement("canvas");
-        canvas.width = tw;
-        canvas.height = th;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, tw, th);
-        const data = ctx.getImageData(0, 0, tw, th).data;
-
-        // Create 2D histogram bins (hue × saturation)
-        const H_BINS = 36; // 10° hue increments
-        const S_BINS = 5; // 20% saturation increments
-        const SIZE = H_BINS * S_BINS;
-        const wSum = new Float32Array(SIZE); // Weighted pixel count
-        const rSum = new Float32Array(SIZE); // Weighted red sum
-        const gSum = new Float32Array(SIZE); // Weighted green sum
-        const bSum = new Float32Array(SIZE); // Weighted blue sum
-
-        // Analyze each pixel
-        for (let i = 0; i < data.length; i += 4) {
-          const a = data[i + 3] / 255;
-          if (a < 0.05) continue; // Skip transparent pixels
-
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          const [h, s, l] = rgbToHsl(r, g, b);
-
-          // Skip near-white, near-black, and desaturated colors
-          if (l < 0.1 || l > 0.92 || s < 0.08) continue;
-
-          // Weight by saturation and mid-tone preference
-          const w = a * (s * s) * (1 - Math.abs(l - 0.5) * 0.6);
-
-          // Calculate bin indices
-          const hi = Math.max(
-            0,
-            Math.min(H_BINS - 1, Math.floor((h / 360) * H_BINS))
-          );
-          const si = Math.max(0, Math.min(S_BINS - 1, Math.floor(s * S_BINS)));
-          const bidx = hi * S_BINS + si;
-
-          // Accumulate weighted values
-          wSum[bidx] += w;
-          rSum[bidx] += r * w;
-          gSum[bidx] += g * w;
-          bSum[bidx] += b * w;
-        }
-
-        // Find primary color (bin with highest weight)
-        let pIdx = -1;
-        let pW = 0;
-        for (let i = 0; i < SIZE; i++) {
-          if (wSum[i] > pW) {
-            pW = wSum[i];
-            pIdx = i;
-          }
-        }
-
-        if (pIdx < 0 || pW <= 0) return fallbackFromIndex(idx);
-
-        const pHue = Math.floor(pIdx / S_BINS) * (360 / H_BINS);
-
-        // Find secondary color (sufficiently different hue)
-        let sIdx = -1;
-        let sW = 0;
-        for (let i = 0; i < SIZE; i++) {
-          const w = wSum[i];
-          if (w <= 0) continue;
-
-          const h = Math.floor(i / S_BINS) * (360 / H_BINS);
-          let dh = Math.abs(h - pHue);
-          dh = Math.min(dh, 360 - dh); // Shortest distance on color wheel
-
-          if (dh >= 25 && w > sW) {
-            // At least 25° different
-            sW = w;
-            sIdx = i;
-          }
-        }
-
-        // Calculate weighted average RGB for a bin
-        const avgRGB = (idx) => {
-          const w = wSum[idx] || 1e-6;
-          return [
-            Math.round(rSum[idx] / w),
-            Math.round(gSum[idx] / w),
-            Math.round(bSum[idx] / w),
-          ];
-        };
-
-        // Build primary color
-        const [pr, pg, pb] = avgRGB(pIdx);
-        let [h1, s1] = rgbToHsl(pr, pg, pb);
-        s1 = Math.max(0.45, Math.min(1, s1 * 1.15)); // Boost saturation
-        const c1 = hslToRgb(h1, s1, 0.5);
-
-        // Build secondary color
-        let c2;
-        if (sIdx >= 0 && sW >= pW * 0.6) {
-          // Use distinct secondary color
-          const [sr, sg, sb] = avgRGB(sIdx);
-          let [h2, s2] = rgbToHsl(sr, sg, sb);
-          s2 = Math.max(0.45, Math.min(1, s2 * 1.05));
-          c2 = hslToRgb(h2, s2, 0.72);
-        } else {
-          // Use lighter version of primary
-          c2 = hslToRgb(h1, s1, 0.72);
-        }
-
-        return { c1, c2 };
-      } catch {
-        return fallbackFromIndex(idx);
-      }
-    }
-
-    /**
-     * Extract colors from card images progressively
-     * Only extracts from visible images initially, others are extracted on demand
-     */
-    function buildPalette() {
-      // Initialize palette with fallback colors
-      gradPalette = items.map((it, i) => fallbackFromIndex(i));
-
-      // Extract colors only from visible images (first 5) to avoid blocking
-      const VISIBLE_COUNT = Math.min(5, items.length);
-      for (let i = 0; i < VISIBLE_COUNT; i++) {
-        const img = items[i].el.querySelector("img");
-        if (img && img.complete && img.naturalWidth > 0) {
-          gradPalette[i] = extractColors(img, i);
-        }
-      }
-    }
-
-    /**
-     * Extract color for a specific image index (called on demand)
-     */
-    function extractColorForIndex(idx) {
-      if (idx < 0 || idx >= items.length) return;
-
-      const img = items[idx].el.querySelector("img");
-      if (img && img.complete && img.naturalWidth > 0) {
-        gradPalette[idx] = extractColors(img, idx);
-      }
-    }
-
-    /**
-     * Update the target gradient colors
-     */
-    function updateGradientTarget(pal) {
-      const to = {
-        r1: pal.c1[0],
-        g1: pal.c1[1],
-        b1: pal.c1[2],
-        r2: pal.c2[0],
-        g2: pal.c2[1],
-        b2: pal.c2[2],
-      };
-
-      // Animate transition with GSAP if available
-      if (gsap) {
-        bgFastUntil = performance.now() + 800; // High FPS for smooth transition
-        gsap.to(gradCurrent, {
-          ...to,
-          duration: 0.45,
-          ease: "power2.out",
-        });
-      } else {
-        Object.assign(gradCurrent, to);
-      }
-    }
-
-    /**
-     * Set the active gradient based on the centered card
-     * @param {number} idx - Card index
-     */
-    function setActiveGradient(idx) {
-      if (!bgCtx || idx < 0 || idx >= items.length || idx === activeIndex)
-        return;
-
-      activeIndex = idx;
-
-      // Check if we need to extract colors (if we only have fallback)
-      const img = items[idx].el.querySelector("img");
-      const currentPal = gradPalette[idx];
-      const isFallback =
-        !currentPal ||
-        (currentPal.c1 &&
-          currentPal.c1[0] === currentPal.c1[1] &&
-          currentPal.c1[1] === currentPal.c1[2]);
-
-      if (img && img.complete && img.naturalWidth > 0 && isFallback) {
-        // Schedule extraction to avoid blocking the main thread during scroll
-        const runExtraction = () => {
-          extractColorForIndex(idx);
-          // Only update if this is still the active card
-          if (activeIndex === idx) {
-            updateGradientTarget(gradPalette[idx]);
-          }
-        };
-
-        if (window.requestIdleCallback) {
-          window.requestIdleCallback(runExtraction);
-        } else {
-          setTimeout(runExtraction, 50);
-        }
-      }
-
-      // Apply current palette immediately (might be fallback)
-      const pal = gradPalette[idx] || {
-        c1: [240, 240, 240],
-        c2: [235, 235, 235],
-      };
-
-      updateGradientTarget(pal);
-    }
-
-    // ============================================================================
-    // BACKGROUND RENDERING
-    // ============================================================================
-
-    /**
-     * Resize background canvas to match viewport
-     */
-    function resizeBG() {
-      if (!bgCanvas || !bgCtx) return;
-
-      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-      const w = bgCanvas.clientWidth || stage.clientWidth;
-      const h = bgCanvas.clientHeight || stage.clientHeight;
-      const tw = Math.floor(w * dpr);
-      const th = Math.floor(h * dpr);
-
-      if (bgCanvas.width !== tw || bgCanvas.height !== th) {
-        bgCanvas.width = tw;
-        bgCanvas.height = th;
-        bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      }
-    }
-
-    /**
-     * Render animated gradient background
-     */
-    function drawBackground() {
-      if (!bgCanvas || !bgCtx) return;
-
-      const now = performance.now();
-      const minInterval = now < bgFastUntil ? 16 : 33; // 60fps or 30fps
-
-      // Throttle rendering based on transition state
-      if (now - lastBgDraw < minInterval) {
-        bgRAF = requestAnimationFrame(drawBackground);
-        return;
-      }
-
-      lastBgDraw = now;
-      resizeBG();
-
-      const w = bgCanvas.clientWidth || stage.clientWidth;
-      const h = bgCanvas.clientHeight || stage.clientHeight;
-
-      // Fill base color
-      bgCtx.fillStyle = "#f6f7f9";
-      bgCtx.fillRect(0, 0, w, h);
-
-      // Animate gradient centers
-      const time = now * 0.0002;
-      const cx = w * 0.5;
-      const cy = h * 0.5;
-      const a1 = Math.min(w, h) * 0.35; // Amplitude for first gradient
-      const a2 = Math.min(w, h) * 0.28; // Amplitude for second gradient
-
-      // Calculate floating positions using trigonometry
-      const x1 = cx + Math.cos(time) * a1;
-      const y1 = cy + Math.sin(time * 0.8) * a1 * 0.4;
-      const x2 = cx + Math.cos(-time * 0.9 + 1.2) * a2;
-      const y2 = cy + Math.sin(-time * 0.7 + 0.7) * a2 * 0.5;
-
-      const r1 = Math.max(w, h) * 0.75; // First gradient radius
-      const r2 = Math.max(w, h) * 0.65; // Second gradient radius
-
-      // Draw first radial gradient
-      const g1 = bgCtx.createRadialGradient(x1, y1, 0, x1, y1, r1);
-      g1.addColorStop(
-        0,
-        `rgba(${gradCurrent.r1},${gradCurrent.g1},${gradCurrent.b1},0.85)`
-      );
-      g1.addColorStop(1, "rgba(255,255,255,0)");
-      bgCtx.fillStyle = g1;
-      bgCtx.fillRect(0, 0, w, h);
-
-      // Draw second radial gradient
-      const g2 = bgCtx.createRadialGradient(x2, y2, 0, x2, y2, r2);
-      g2.addColorStop(
-        0,
-        `rgba(${gradCurrent.r2},${gradCurrent.g2},${gradCurrent.b2},0.70)`
-      );
-      g2.addColorStop(1, "rgba(255,255,255,0)");
-      bgCtx.fillStyle = g2;
-      bgCtx.fillRect(0, 0, w, h);
-
-      bgRAF = requestAnimationFrame(drawBackground);
-    }
-
-    /**
-     * Start background animation loop
-     */
-    function startBG() {
-      if (!bgCanvas || !bgCtx) return;
-      cancelBG();
-      bgRAF = requestAnimationFrame(drawBackground);
-    }
-
-    /**
-     * Stop background animation loop
-     */
-    function cancelBG() {
-      if (bgRAF) cancelAnimationFrame(bgRAF);
-      bgRAF = null;
-    }
-
-    // ============================================================================
     // EVENT HANDLERS
     // ============================================================================
 
@@ -931,12 +490,11 @@ const loader = document.getElementById('loader');
 
       // Force update of all transforms to maintain spacing
       updateCarouselTransforms();
-      resizeBG();
     }
 
     // Mouse wheel scrolling
     function onWheel(e) {
-      if (isEntering) return;
+      // Allow wheel immediately
       e.preventDefault();
 
       const delta =
@@ -951,6 +509,17 @@ const loader = document.getElementById('loader');
     }
     stage.addEventListener("dragstart", onDragStart);
 
+    // Hover handling for auto-pause
+    function onMouseEnter() {
+      isHovered = true;
+    }
+    stage.addEventListener("mouseenter", onMouseEnter);
+
+    function onMouseLeave() {
+      isHovered = false;
+    }
+    stage.addEventListener("mouseleave", onMouseLeave);
+
     // Drag state
     let dragging = false;
     let lastX = 0;
@@ -961,7 +530,7 @@ const loader = document.getElementById('loader');
 
     // Pointer down - start dragging
     function onPointerDown(e) {
-      if (isEntering) return;
+      // Allow interaction immediately
       if (e.target.closest(".frame")) return;
 
       dragging = true;
@@ -1062,10 +631,8 @@ const loader = document.getElementById('loader');
     function onVisibilityChange() {
       if (document.hidden) {
         cancelCarousel();
-        cancelBG();
       } else {
         startCarousel();
-        startBG();
       }
     }
     document.addEventListener("visibilitychange", onVisibilityChange);
@@ -1073,50 +640,6 @@ const loader = document.getElementById('loader');
     // ============================================================================
     // INITIALIZATION & ENTRY ANIMATION
     // ============================================================================
-
-    /**
-     * Subtle entry animation for visible cards
-     * @param {Array} visibleCards - Cards to animate
-     */
-    async function animateEntry(visibleCards) {
-      // Skip animation if images are still loading - just show cards
-      const imagesLoading = visibleCards.some(({ item }) => {
-        const img = item.el.querySelector("img");
-        return img && !img.complete;
-      });
-
-      if (imagesLoading) {
-        // Just set final positions without animation
-        visibleCards.forEach(({ item, screenX }) => {
-          const { transform } = transformForScreenX(screenX);
-          item.el.style.transform = transform;
-          item.el.style.opacity = "1";
-        });
-        return;
-      }
-
-      // Subtle fade-in animation only
-      await new Promise((r) => requestAnimationFrame(r));
-
-      visibleCards.forEach(({ item, screenX }, idx) => {
-        const { transform } = transformForScreenX(screenX);
-
-        // Start with final position but invisible
-        item.el.style.transform = transform;
-        item.el.style.opacity = "0";
-
-        // Simple fade-in with slight delay
-        setTimeout(() => {
-          item.el.style.transition = "opacity 0.3s ease-out";
-          item.el.style.opacity = "1";
-        }, idx * 20);
-      });
-
-      // Wait for fade-in to complete
-      await new Promise((resolve) => {
-        setTimeout(resolve, visibleCards.length * 20 + 300);
-      });
-    }
 
     /**
      * Initialize the carousel application
@@ -1131,92 +654,65 @@ const loader = document.getElementById('loader');
       updateCarouselTransforms();
       stage.classList.add("carousel-mode");
 
-      // Wait for all images to load
-      await waitForImages();
+      // START IMMEDIATELY - Don't wait for images
+      if (loader) loader.classList.add("loader--hide");
+      startCarousel();
 
-      // Decode images to prevent jank
-      await decodeAllImages();
-
-      // Force browser to paint images
-      items.forEach((it) => {
-        const img = it.el.querySelector("img");
-        if (img) void img.offsetHeight;
-      });
-
-      // Extract colors from images for gradients
-      buildPalette();
-
-      // Find and set initial centered card
-      const half = TRACK / 2;
-      let closestIdx = 0;
-      let closestDist = Infinity;
-
-      for (let i = 0; i < items.length; i++) {
-        let pos = items[i].x - SCROLL_X;
-        if (pos < -half) pos += TRACK;
-        if (pos > half) pos -= TRACK;
-        const d = Math.abs(pos);
-        if (d < closestDist) {
-          closestDist = d;
-          closestIdx = i;
-        }
-      }
-
-      setActiveGradient(closestIdx);
-
-      // Preload nearby images for initial view
-      preloadNearbyImages(closestIdx);
-
-      // Initialize background canvas
-      resizeBG();
-      if (bgCtx) {
-        const w = bgCanvas.clientWidth || stage.clientWidth;
-        const h = bgCanvas.clientHeight || stage.clientHeight;
-        bgCtx.fillStyle = "#f6f7f9";
-        bgCtx.fillRect(0, 0, w, h);
-      }
-
-      // Skip warmup compositing to avoid visible scrolling animation
-      // GPU compositing will happen naturally during first interaction
-
-      // Wait for browser idle time
-      if ("requestIdleCallback" in window) {
-        await new Promise((r) => requestIdleCallback(r, { timeout: 100 }));
-      }
-
-      // Start background animation
-      startBG();
-      await new Promise((r) => setTimeout(r, 100)); // Let background settle
-
-      // Prepare entry animation for visible cards
+      // Animate entry in parallel (non-blocking)
       const viewportWidth = window.innerWidth;
       const visibleCards = [];
-
       for (let i = 0; i < items.length; i++) {
         let pos = items[i].x - SCROLL_X;
-        if (pos < -half) pos += TRACK;
-        if (pos > half) pos -= TRACK;
-
-        const screenX = pos;
-        if (Math.abs(screenX) < viewportWidth * 0.6) {
-          visibleCards.push({ item: items[i], screenX, index: i });
+        // Simple wrap check for visibility
+        if (pos < -TRACK / 2) pos += TRACK;
+        if (pos > TRACK / 2) pos -= TRACK;
+        if (Math.abs(pos) < viewportWidth * 0.6) {
+          visibleCards.push({ item: items[i], screenX: pos, index: i });
         }
       }
-
-      // Sort cards left to right
       visibleCards.sort((a, b) => a.screenX - b.screenX);
 
-      // Hide loader
-      if (loader) loader.classList.add("loader--hide");
+      // Simple fade in for initial cards
+      visibleCards.forEach(({ item }, idx) => {
+        item.el.style.opacity = "0";
+        setTimeout(() => {
+          item.el.style.transition = "opacity 0.5s ease-out";
+          item.el.style.opacity = "1";
+        }, idx * 50);
+      });
 
-      // Animate cards entering
-      await animateEntry(visibleCards);
+      // Background tasks: Load images and extract colors
+      waitForImages().then(async () => {
+        await decodeAllImages();
 
-      // Enable user interaction
-      isEntering = false;
+        // Force browser to paint images
+        items.forEach((it) => {
+          const img = it.el.querySelector("img");
+          if (img) {
+            // eslint-disable-next-line no-unused-expressions
+            void img.offsetHeight;
+          }
+        });
 
-      // Start main carousel loop
-      startCarousel();
+        // Find and set initial centered card
+        const half = TRACK / 2;
+        let closestIdx = 0;
+        let closestDist = Infinity;
+
+        for (let i = 0; i < items.length; i++) {
+          let pos = items[i].x - SCROLL_X;
+          if (pos < -half) pos += TRACK;
+          if (pos > half) pos -= TRACK;
+          const d = Math.abs(pos);
+          if (d < closestDist) {
+            closestDist = d;
+            closestIdx = i;
+          }
+        }
+
+        activeIndex = closestIdx;
+        preloadNearbyImages(closestIdx);
+      });
     }
 
     // ============================================================================
@@ -1230,12 +726,12 @@ const loader = document.getElementById('loader');
 
     return () => {
       cancelCarousel();
-      cancelBG();
       if (rafId) cancelAnimationFrame(rafId);
-      if (bgRAF) cancelAnimationFrame(bgRAF);
 
       stage.removeEventListener("wheel", onWheel);
       stage.removeEventListener("dragstart", onDragStart);
+      stage.removeEventListener("mouseenter", onMouseEnter);
+      stage.removeEventListener("mouseleave", onMouseLeave);
       stage.removeEventListener("pointerdown", onPointerDown);
       stage.removeEventListener("pointermove", onPointerMove);
       stage.removeEventListener("pointerup", onPointerUp);
@@ -1268,8 +764,6 @@ const loader = document.getElementById('loader');
 
   return (
     <div className="stage" ref={stageRef}>
-      <canvas id="bg" ref={bgRef} className="bg-canvas"></canvas>
-
       <div id="loader" ref={loaderRef}>
         Loading...
       </div>
