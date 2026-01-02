@@ -66,6 +66,18 @@ const loader = document.getElementById('loader');
     let SCROLL_X = 0; // Current scroll position
     let VW_HALF = window.innerWidth * 0.5;
 
+    // Responsive dimensions
+    function getResponsiveCardDimensions() {
+      const width = window.innerWidth;
+      if (width < 768) {
+        // Mobile: 70vw width, maintain aspect ratio ~0.78
+        const w = Math.round(width * 0.7);
+        const h = Math.round(w * 1.3);
+        return { w, h };
+      }
+      return { w: 350, h: 450 }; // Desktop defaults
+    }
+
     // Physics state
     let vX = 0; // Velocity in X direction
     let isHovered = false; // Pause auto-scroll on hover
@@ -107,79 +119,6 @@ const loader = document.getElementById('loader');
     }
 
     // ============================================================================
-    // IMAGE PRELOADING
-    // ============================================================================
-
-    /**
-     * Preload images using link tags for browser optimization
-     * Only preload visible and nearby images for better performance
-     * @param {string[]} srcs - Array of image URLs
-     */
-    function preloadImageLinks(srcs) {
-      if (!document.head) return;
-
-      // Only preload the first 10 images to save bandwidth
-      const PRELOAD_COUNT = Math.min(10, srcs.length);
-
-      for (let i = 0; i < PRELOAD_COUNT; i++) {
-        const href = srcs[i];
-        const link = document.createElement("link");
-        link.rel = "preload";
-        link.as = "image";
-        link.href = href;
-        link.fetchPriority = i < PRELOAD_COUNT ? "high" : "auto";
-        document.head.appendChild(link);
-      }
-    }
-
-    /**
-     * Wait for visible card images to finish loading
-     * Only waits for images in the visible range to avoid blocking
-     * @returns {Promise<void>}
-     */
-    function waitForImages() {
-      // Optimize: Only wait for initial visible images (first 7)
-      // The rest will load in background
-      const CHECK_COUNT = Math.min(7, items.length);
-
-      const promises = items.slice(0, CHECK_COUNT).map((it) => {
-        const img = it.el.querySelector("img");
-        if (!img || img.complete) return Promise.resolve();
-
-        return new Promise((resolve) => {
-          const done = () => resolve();
-          img.addEventListener("load", done, { once: true });
-          img.addEventListener("error", done, { once: true });
-          setTimeout(done, 1000); // Timeout de 1s max par image
-        });
-      });
-
-      return Promise.allSettled(promises);
-    }
-
-    /**
-     * Decode visible images to prevent jank during first interaction
-     * Only decodes images that are likely to be seen immediately
-     * @returns {Promise<void>}
-     */
-    async function decodeAllImages() {
-      // Optimize: Only decode initial visible images
-      const DECODE_COUNT = Math.min(7, items.length);
-
-      const tasks = items.slice(0, DECODE_COUNT).map((it) => {
-        const img = it.el.querySelector("img");
-        if (!img || !img.complete) return Promise.resolve();
-
-        if (typeof img.decode === "function") {
-          return img.decode().catch(() => {});
-        }
-        return Promise.resolve();
-      });
-
-      await Promise.allSettled(tasks);
-    }
-
-    // ============================================================================
     // CAROUSEL SETUP
     // ============================================================================
 
@@ -207,8 +146,11 @@ const loader = document.getElementById('loader');
         img.draggable = false;
 
         // Optimize loading strategy
-        // Load first 5 images eagerly, others lazily
-        if (i < 5) {
+        // Load fewer images eagerly on mobile to prevent blocking
+        const isMobile = window.innerWidth < 768;
+        const EAGER_COUNT = isMobile ? 2 : 5;
+
+        if (i < EAGER_COUNT) {
           img.loading = "eager";
           img.fetchPriority = "high";
         } else {
@@ -254,7 +196,9 @@ const loader = document.getElementById('loader');
      * Preload images progressively based on scroll position
      */
     function preloadNearbyImages(centerIndex) {
-      const PRELOAD_RANGE = 4; // Preload 2 images on each side
+      // Reduce preload range on mobile to prevent blocking
+      const isMobile = window.innerWidth < 768;
+      const PRELOAD_RANGE = isMobile ? 2 : 4;
 
       for (let offset = -PRELOAD_RANGE; offset <= PRELOAD_RANGE; offset++) {
         const idx = mod(centerIndex + offset, items.length);
@@ -271,8 +215,15 @@ const loader = document.getElementById('loader');
         }
 
         // Boost priority for nearby images
-        img.loading = "eager";
-        img.fetchPriority = "high";
+        // Only use eager loading for the very closest images to avoid main thread blocking
+        const dist = Math.abs(offset);
+        if (dist <= 1) {
+          img.loading = "eager";
+          img.fetchPriority = "high";
+        } else {
+          img.loading = "lazy";
+          img.fetchPriority = "auto";
+        }
 
         // If image hasn't started loading, start it
         if (!img.src || img.src === "") {
@@ -298,21 +249,23 @@ const loader = document.getElementById('loader');
      * Measure card dimensions and calculate layout
      */
     function measure() {
-      const sample = items[0]?.el;
-      if (!sample) return;
+      // Get responsive dimensions
+      const { w, h } = getResponsiveCardDimensions();
 
-      // Gap is fixed and never changes
-      const r = sample.getBoundingClientRect();
-      const newCardW = r.width || CARD_W;
-      const newCardH = r.height || CARD_H;
+      const dimsChanged =
+        Math.abs(w - CARD_W) > 0.5 || Math.abs(h - CARD_H) > 0.5;
 
-      // Update dimensions if changed
-      if (
-        Math.abs(newCardW - CARD_W) > 0.5 ||
-        Math.abs(newCardH - CARD_H) > 0.5
-      ) {
-        CARD_W = newCardW;
-        CARD_H = newCardH;
+      if (dimsChanged) {
+        CARD_W = w;
+        CARD_H = h;
+
+        // Update all existing cards with new dimensions
+        items.forEach((item) => {
+          if (item.el) {
+            item.el.style.width = `${CARD_W}px`;
+            item.el.style.height = `${CARD_H}px`;
+          }
+        });
       }
 
       // Recalculate STEP with fixed gap
@@ -383,10 +336,6 @@ const loader = document.getElementById('loader');
         }
       }
 
-      // Get adjacent cards for selective blur
-      const prevIdx = (closestIdx - 1 + items.length) % items.length;
-      const nextIdx = (closestIdx + 1) % items.length;
-
       // Apply transforms to all cards
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
@@ -402,16 +351,19 @@ const loader = document.getElementById('loader');
             it.el.style.visibility = "visible";
         }
 
-        const norm = Math.max(-1, Math.min(1, pos / VW_HALF));
         const { transform, z } = transformForScreenX(pos);
 
         it.el.style.transform = transform;
         it.el.style.zIndex = String(1000 + Math.round(z)); // Higher z-index for cards in front
 
-        // Apply subtle blur to non-core cards
+        // Optimization: Remove blur on mobile or significantly reduce it
+        // Blur is extremely expensive on mobile GPUs
+        /*
+        const norm = Math.max(-1, Math.min(1, pos / VW_HALF));
         const isCore = i === closestIdx || i === prevIdx || i === nextIdx;
         const blur = isCore ? 0 : 2 * Math.pow(Math.abs(norm), 1.1);
         it.el.style.filter = `blur(${blur.toFixed(2)}px)`;
+        */
       }
 
       // Update gradient if active card changed
@@ -499,7 +451,10 @@ const loader = document.getElementById('loader');
 
       const delta =
         Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      vX += delta * WHEEL_SENS * 20;
+
+      // Limit wheel velocity to prevent massive jumps
+      const wheelFactor = Math.min(Math.abs(delta), 100) * Math.sign(delta);
+      vX += wheelFactor * WHEEL_SENS * 10;
     }
     stage.addEventListener("wheel", onWheel, { passive: false });
 
@@ -645,20 +600,23 @@ const loader = document.getElementById('loader');
      * Initialize the carousel application
      */
     async function init() {
-      // Preload images for faster loading
-      preloadImageLinks(IMAGES);
+      // 1. Initialize responsive dimensions immediately
+      const dims = getResponsiveCardDimensions();
+      CARD_W = dims.w;
+      CARD_H = dims.h;
+      STEP = CARD_W + GAP;
 
-      // Create DOM elements
+      // 2. Create DOM elements
       createCards();
       measure();
       updateCarouselTransforms();
       stage.classList.add("carousel-mode");
 
-      // START IMMEDIATELY - Don't wait for images
+      // 3. START IMMEDIATELY
       if (loader) loader.classList.add("loader--hide");
       startCarousel();
 
-      // Animate entry in parallel (non-blocking)
+      // 4. Animate entry in parallel (non-blocking)
       const viewportWidth = window.innerWidth;
       const visibleCards = [];
       for (let i = 0; i < items.length; i++) {
@@ -681,38 +639,26 @@ const loader = document.getElementById('loader');
         }, idx * 50);
       });
 
-      // Background tasks: Load images and extract colors
-      waitForImages().then(async () => {
-        await decodeAllImages();
+      // 5. Initial setup without blocking
+      // Find and set initial centered card
+      const half = TRACK / 2;
+      let closestIdx = 0;
+      let closestDist = Infinity;
 
-        // Force browser to paint images
-        items.forEach((it) => {
-          const img = it.el.querySelector("img");
-          if (img) {
-            // eslint-disable-next-line no-unused-expressions
-            void img.offsetHeight;
-          }
-        });
-
-        // Find and set initial centered card
-        const half = TRACK / 2;
-        let closestIdx = 0;
-        let closestDist = Infinity;
-
-        for (let i = 0; i < items.length; i++) {
-          let pos = items[i].x - SCROLL_X;
-          if (pos < -half) pos += TRACK;
-          if (pos > half) pos -= TRACK;
-          const d = Math.abs(pos);
-          if (d < closestDist) {
-            closestDist = d;
-            closestIdx = i;
-          }
+      for (let i = 0; i < items.length; i++) {
+        let pos = items[i].x - SCROLL_X;
+        if (pos < -half) pos += TRACK;
+        if (pos > half) pos -= TRACK;
+        const d = Math.abs(pos);
+        if (d < closestDist) {
+          closestDist = d;
+          closestIdx = i;
         }
+      }
 
-        activeIndex = closestIdx;
-        preloadNearbyImages(closestIdx);
-      });
+      activeIndex = closestIdx;
+      // Trigger preload for visible items only (handled by updateCarouselTransforms too, but good to be explicit)
+      preloadNearbyImages(closestIdx);
     }
 
     // ============================================================================
