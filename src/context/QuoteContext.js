@@ -194,6 +194,7 @@ Format ta réponse UNIQUEMENT en JSON strict (sans texte avant ou après) :
     }
 
     try {
+      // 1. Try to fetch from Supabase first
       const { count, error: countError } = await supabase
         .from("quotes")
         .select("*", { count: "exact", head: true });
@@ -223,6 +224,22 @@ Format ta réponse UNIQUEMENT en JSON strict (sans texte avant ou après) :
       return data;
     } catch (err) {
       console.error("❌ Erreur chargement quote:", err);
+      
+      // If network error or DNS resolution failed, use offline fallback
+      // This allows the app to work even if Supabase is unreachable
+      if (err.message && (err.message.includes("Failed to fetch") || err.message.includes("network") || !window.navigator.onLine)) {
+         console.warn("⚠️ Using offline fallback quote due to network error");
+         const fallbackQuote = {
+            id: "offline-fallback",
+            quote_text: "La persévérance est la clé du succès, même face aux obstacles techniques.",
+            quote_author: "Sagesse Tech",
+            category: "Motivation"
+         };
+         setDailyQuote(fallbackQuote);
+         setIsLoading(false);
+         return fallbackQuote;
+      }
+
       setError(err.message);
       setIsLoading(false);
       return null;
