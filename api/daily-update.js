@@ -6,9 +6,15 @@ const supabase = createClient(
 );
 
 module.exports = async (req, res) => {
-  const tokenParam = req.query.token;
-  if (tokenParam !== process.env.CRON_SECRET) {
-    return res.status(401).json({ error: "Unauthorized" });
+  // Accepter soit le cron Vercel, soit un token manuel
+  const isVercelCron = req.headers["x-vercel-cron"] === "1";
+  const isManualWithToken = req.query.token === process.env.CRON_SECRET;
+
+  if (!isVercelCron && !isManualWithToken) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      hint: "Use Vercel Cron or provide valid token",
+    });
   }
 
   try {
@@ -65,6 +71,7 @@ module.exports = async (req, res) => {
       date: today,
       quote: quote.quote_text,
       article: savedArticle.title,
+      triggered_by: isVercelCron ? "Vercel Cron" : "Manual trigger",
     });
   } catch (error) {
     console.error("Erreur:", error);

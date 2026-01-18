@@ -21,5 +21,11 @@
         }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/daily-update",
+      "schedule": "0 0 * * *"
+    }
   ]
 }
