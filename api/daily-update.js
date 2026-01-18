@@ -12,14 +12,20 @@ module.exports = async (req, res) => {
   console.log("Headers:", JSON.stringify(req.headers, null, 2));
   console.log("x-vercel-cron:", req.headers["x-vercel-cron"]);
 
-  const isVercelCron = req.headers["x-vercel-cron"] === "1";
+  // Méthode 1 : User-Agent Vercel Cron
+  const isVercelCron = req.headers["user-agent"]?.includes("vercel-cron");
+
+  // Méthode 2 : OIDC Token (plus sécurisé)
+  const hasVercelOIDC = !!req.headers["x-vercel-oidc-token"];
+
+  // Méthode 3 : Token manuel
   const isManualWithToken = req.query.token === process.env.CRON_SECRET;
 
   console.log("isVercelCron:", isVercelCron);
   console.log("isManualWithToken:", isManualWithToken);
-  // Accepter soit le cron Vercel, soit un token manuel
+  console.log("hasVercelOIDC", hasVercelOIDC);
 
-  if (!isVercelCron && !isManualWithToken) {
+  if (!isVercelCron && !hasVercelOIDC && !isManualWithToken) {
     return res.status(401).json({
       error: "Unauthorized",
       hint: "Use Vercel Cron or provide valid token",
