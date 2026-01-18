@@ -6,9 +6,18 @@ const supabase = createClient(
 );
 
 module.exports = async (req, res) => {
-  // Accepter soit le cron Vercel, soit un token manuel
+  // LOG DE DEBUG
+  console.log("=== CRON TRIGGERED ===");
+  console.log("Time:", new Date().toISOString());
+  console.log("Headers:", JSON.stringify(req.headers, null, 2));
+  console.log("x-vercel-cron:", req.headers["x-vercel-cron"]);
+
   const isVercelCron = req.headers["x-vercel-cron"] === "1";
   const isManualWithToken = req.query.token === process.env.CRON_SECRET;
+
+  console.log("isVercelCron:", isVercelCron);
+  console.log("isManualWithToken:", isManualWithToken);
+  // Accepter soit le cron Vercel, soit un token manuel
 
   if (!isVercelCron && !isManualWithToken) {
     return res.status(401).json({
