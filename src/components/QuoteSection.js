@@ -1,14 +1,15 @@
 import { useGet } from "../hooks/useGet";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useDownload } from "../hooks/useDownload";
 import { useShare } from "../hooks/useShare";
+import { getDisplayUrl, getThumbnailUrl } from "../utils/imageHelper";
 
 export const QuoteSection = ({ query, name, category }) => {
   const size = 350;
   const { data, isLoading } = useGet({ query, name, category });
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(
-    window.innerWidth < 768 ? 4 : 9
+    window.innerWidth < 768 ? 4 : 8
   );
   const [selectedQuoteIndex, setSelectedQuoteIndex] = useState(null);
 
@@ -17,37 +18,50 @@ export const QuoteSection = ({ query, name, category }) => {
 
   useEffect(() => {
     const handleResize = () => {
-      setItemsPerPage(window.innerWidth < 768 ? 4 : 9);
+      setItemsPerPage(window.innerWidth < 768 ? 4 : 8);
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 1. D'abord dédoublonner TOUTES les données
-  const allUniqueQuotes = data
-    ? Array.from(
-        new Map(
-          data.map((q) => [q.quote_text?.trim().toLowerCase(), q])
-        ).values()
-      )
-    : [];
-
-  // 2. Ensuite appliquer la pagination sur les données propres
-  const start = (page - 1) * itemsPerPage;
-  const end = page * itemsPerPage;
-  const paginatedQuotes = allUniqueQuotes.slice(start, end);
+  const allUniqueQuotes = useMemo(() => {
+    return data
+      ? Array.from(
+          new Map(
+            data.map((q) => [q.quote_text?.trim().toLowerCase(), q])
+          ).values()
+        )
+      : [];
+  }, [data]);
 
   const totalItems = Math.ceil(allUniqueQuotes.length / itemsPerPage);
 
-  const [fallBack, setFallBack] = useState(false)
-  const currentQuote = selectedQuoteIndex !== null ? allUniqueQuotes[selectedQuoteIndex] : null;
-  const currentImageUrl = currentQuote
-    ? `https://res.cloudinary.com/dbkjpn2db/image/upload/${fallBack ? 'f_auto,q_auto,w_800,h_800,c_fill,g_auto/' : ''}quote_images/${currentQuote.id}.png`
-    : null;
-  
+  const paginatedQuotes = useMemo(() => {
+    const start = (page - 1) * itemsPerPage;
+    const end = page * itemsPerPage;
+    return allUniqueQuotes.slice(start, end);
+  }, [page, itemsPerPage, allUniqueQuotes]);
 
+  const currentQuote =
+    selectedQuoteIndex !== null ? allUniqueQuotes[selectedQuoteIndex] : null;
 
+  // Optimized URL for Modal using image helper
+  const currentImageUrl = currentQuote ? getDisplayUrl(currentQuote.id) : null;
+
+  // Preload next and previous images
+  useEffect(() => {
+    if (selectedQuoteIndex !== null && allUniqueQuotes.length > 0) {
+      const preloadIndices = [selectedQuoteIndex + 1, selectedQuoteIndex - 1];
+      preloadIndices.forEach((index) => {
+        if (index >= 0 && index < allUniqueQuotes.length) {
+          const item = allUniqueQuotes[index];
+          const img = new Image();
+          img.src = getDisplayUrl(item.id);
+        }
+      });
+    }
+  }, [selectedQuoteIndex, allUniqueQuotes]);
 
   return isLoading ? (
     <div className="flex justify-center items-center py-20">
@@ -70,7 +84,7 @@ export const QuoteSection = ({ query, name, category }) => {
         </span>
         <button
           onClick={() => setPage((p) => Math.min(p + 1, totalItems))}
-          disabled={end >= allUniqueQuotes.length}
+          disabled={page >= totalItems}
           className="px-5 py-2 rounded-full border border-black
                disabled:opacity-40 disabled:cursor-not-allowed
                hover:bg-black hover:text-white transition"
@@ -82,24 +96,26 @@ export const QuoteSection = ({ query, name, category }) => {
         {paginatedQuotes &&
           paginatedQuotes.map((quote, index) => (
             <div
-              key={index}
+              key={`${page}-${quote.id}-${index}`}
               className={`w-[${size}px] h-[${size}px] border border-black rounded-xl 
                    flex items-center justify-center overflow-hidden bg-white`}
             >
               <img
-                src={`https://res.cloudinary.com/dbkjpn2db/image/upload/f_auto,q_auto,w_${size},h_${size},c_fill,g_auto/quote_images/${quote.id}.png`}
+                src={getThumbnailUrl(quote.id, size)}
                 onError={(e) => {
-                  if (e.currentTarget.src.includes('f_auto')) {
-                    // First error - try fallback URL
-                    setFallBack(true);
-                    e.currentTarget.src = `https://res.cloudinary.com/dbkjpn2db/image/upload/quote_images/${quote.id}.png`;
+                  if (!e.currentTarget.src.includes("quote_images")) {
+                    // Fallback to default URL
+                    e.currentTarget.src = getDisplayUrl(quote.id);
                   } else {
-                    // Fallback also failed - use placeholder
+                    // Last resort - use placeholder
                     e.currentTarget.src = "/placeholder.webp";
-                    e.currentTarget.onerror = null; // Prevent infinite loop
+                    e.currentTarget.onerror = null;
                   }
                 }}
-                onClick={() => setSelectedQuoteIndex(start + index)}
+                onClick={() => {
+                  const actualIndex = (page - 1) * itemsPerPage + index;
+                  setSelectedQuoteIndex(actualIndex);
+                }}
                 className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
                 alt=""
               />
@@ -234,7 +250,7 @@ export const QuoteSection = ({ query, name, category }) => {
                 <button
                   className="flex items-center gap-3 px-5 py-3 md:px-6 md:py-4 rounded-xl border-2 border-white hover:bg-white/20 transition-colors text-white font-medium"
                   aria-label="Share"
-                  onClick={() => handleShare(currentImageUrl)}
+                  onClick={() => handleShare(currentImageUrl, currentQuote)}
                 >
                   <svg
                     width="32"
@@ -281,13 +297,11 @@ export const QuoteSection = ({ query, name, category }) => {
               </div>
 
               {/* DOWNLOAD BUTTON */}
-              <a
-                href={currentImageUrl}
-                download
+              <button
                 className="flex items-center gap-3 px-5 py-3 md:px-6 md:py-4 rounded-xl border-2 border-white hover:bg-white/20 transition-colors text-white font-medium"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDownload(currentImageUrl);
+                  handleDownload(currentImageUrl, currentQuote);
                 }}
               >
                 <svg
@@ -307,7 +321,7 @@ export const QuoteSection = ({ query, name, category }) => {
                   />
                 </svg>
                 <span className="hidden sm:inline">Download</span>
-              </a>
+              </button>
             </div>
           </div>
         </div>

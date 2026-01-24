@@ -9,7 +9,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import authors from "../assets/authors";
-import { useTitle, useScrollToTop } from "../hooks/index";
+import { useTitle } from "../hooks/index";
 
 export const ArticleDetail = () => {
   const { id } = useParams();
@@ -17,7 +17,7 @@ export const ArticleDetail = () => {
   const [article, setArticle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  useScrollToTop();
+
   useTitle({
     title: article ? `${article.title} - Quoter` : "Article - Quoter",
   });
@@ -62,18 +62,18 @@ export const ArticleDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <main className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-black mx-auto mb-4"></div>
           <p className="text-xl">Chargement de l'article...</p>
         </div>
-      </div>
+      </main>
     );
   }
 
   if (error || !article) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <main className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-2xl font-bold mb-4">
             {error || "Article introuvable"}
@@ -85,13 +85,13 @@ export const ArticleDetail = () => {
             Retour au blog
           </Link>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
     <main className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Bouton retour */}
         <button
           onClick={() => navigate(-1)}

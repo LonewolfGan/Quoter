@@ -1,5 +1,6 @@
 import { useDownload, useShare, useTitle } from "../hooks/index";
 import { useQuote } from "../context/QuoteContext";
+import { getDisplayUrl } from "../utils/imageHelper";
 
 import {
   Share2,
@@ -25,7 +26,7 @@ export const Home = () => {
       </div>
     );
   }
-  const imageUrl = `https://res.cloudinary.com/dbkjpn2db/image/upload/quote_images/${dailyQuote.id}`;
+  const imageUrl = getDisplayUrl(dailyQuote.id);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen py-12 px-4">
@@ -50,7 +51,7 @@ export const Home = () => {
       {/* CITATION CARD */}
       <div className="flex flex-col items-center justify-center border-2 border-black rounded-xl mb-12 mx-2">
         {/* IMAGE */}
-        <div className="p-2 w-[300px] h-[300px] sm:w-[450px] sm:h-[450px] md:w-[500px] md:h-[500px] lg:w-[600px] lg:h-[600px] box-border">
+        <div className="p-2 w-[300px] h-[300px] sm:w-[450px] sm:h-[450px] md:w-[500px] md:h-[500px] lg:w-[550px] lg:h-[550px] box-border">
           <img
             className="w-full h-full object-cover border-2 border-black rounded-xl"
             loading="lazy"
@@ -66,7 +67,10 @@ export const Home = () => {
         <div className="flex flex-row items-center justify-between w-[95%] m-3 p-3 border-2 border-black rounded-xl">
           {/* PARTAGER */}
           <button
-            onClick={() => handleShare(imageUrl)}
+            onClick={(e) => {
+              e.preventDefault();
+              handleShare(imageUrl, dailyQuote);
+            }}
             className="flex items-center gap-2 px-4 py-2 md:px-5 md:py-3 rounded-xl border-2 border-black hover:bg-black hover:text-white transition-all font-medium"
           >
             <Share2 size={48} strokeWidth={1} />
@@ -75,7 +79,10 @@ export const Home = () => {
 
           {/* TÉLÉCHARGER */}
           <button
-            onClick={() => handleDownload(imageUrl)}
+            onClick={(e) => {
+              e.preventDefault();
+              handleDownload(imageUrl, dailyQuote);
+            }}
             className="flex items-center gap-2 px-4 py-2 md:px-5 md:py-3 rounded-xl border-2 border-black hover:bg-black hover:text-white transition-all font-medium"
           >
             <Download size={48} strokeWidth={1} />

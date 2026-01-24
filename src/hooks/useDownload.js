@@ -1,18 +1,41 @@
+import { getDownloadFileName } from "../utils/imageHelper";
+
 export const useDownload = () => {
-  const download = async (file) => {
+  const download = async (imageUrl, quote = null) => {
     try {
-      const response = await fetch(file);
+      if (!imageUrl || typeof imageUrl !== "string") {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Invalid image URL:", imageUrl);
+        }
+        return;
+      }
+
+      const response = await fetch(imageUrl);
+
+      if (!response.ok) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Failed to fetch image:", response.statusText);
+        }
+        return;
+      }
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "quote.png";
+      link.download = quote ? getDownloadFileName(quote) : "quote.png";
+
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
     } catch (error) {
-      console.error("Error downloading image:", error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("Error downloading image:", error);
+      }
     }
   };
 

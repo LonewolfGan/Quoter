@@ -11,39 +11,31 @@ import {
   Zap,
   BookOpen,
   Lightbulb,
-} from "lucide-react"; // Assurez-vous d'installer lucide-react : npm install lucide-react
+  Sprout,
+  Rocket,
+} from "lucide-react";
 
-// Définissez un mapping pour associer une icône à chaque catégorie (ajustez selon vos catégories réelles)
 const categoryIcons = {
   Amour: Heart,
-  Love: Heart,
+  Liberté: Rocket,
   Inspiration: Sparkles,
   Motivation: Zap,
   Bonheur: Smile,
-  Happiness: Smile,
   Sagesse: Brain,
-  Wisdom: Brain,
-  Succès: Trophy,
-  Success: Trophy,
   Amitié: Users,
-  Friendship: Users,
   Vie: Flower2,
-  Life: Flower2,
   Force: Zap,
-  Strength: Zap,
+  Espoir: Sprout,
   Paix: Flower2,
-  Peace: Flower2,
   Connaissance: BookOpen,
-  Knowledge: BookOpen,
   Créativité: Lightbulb,
-  Creativity: Lightbulb,
-  // Ajoutez d'autres catégories ici selon vos besoins
+  Réussite: Trophy,
+  default: Sparkles,
 };
 
 export const Categories = () => {
   const title = "Quoter - Categories";
   useTitle({ title });
-  // Extract unique categories
   const categories = [
     "Amour",
     "Amitié",
@@ -58,13 +50,16 @@ export const Categories = () => {
   ].sort();
 
   return (
-    <main className="p-8 min-h-screen">
+    <main className="p-8 ">
       <h1 className="text-5xl md:text-6xl font-black text-center mb-12">
         Catégories
       </h1>
+      <p className="text-center text-2xl text-gray-900 mb-12">
+        Explorez les citations par thématiques
+      </p>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
         {categories.map((category) => {
-          const Icon = categoryIcons[category] || Sparkles; // Icône par défaut si pas de match
+          const Icon = categoryIcons[category] || categoryIcons.default; // Icône par défaut si pas de match
 
           return (
             <Link

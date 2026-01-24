@@ -19,11 +19,11 @@ export const CallToAction = () => {
   if (path === "/") {
     content = {
       title: "Vous aimez cette citation ?",
-      text: "Découvrez des milliers d'autres citations inspirantes",
+      text: "Découvrez son sens caché et les enseignements essentiels",
       buttons: [
         { label: "Explorer les catégories", to: "/categories", primary: false },
-        { label: "Voir les auteurs", to: "/authors", primary: true },
-        { label: "Voir le blog", to: "/blog", primary: false },
+        { label: "Voir le blog", to: "/blog", primary: true },
+        { label: "Voir les auteurs", to: "/authors", primary: false },
       ],
     };
   } else if (path.startsWith("/blog")) {

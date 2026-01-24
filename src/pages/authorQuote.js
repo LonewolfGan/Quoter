@@ -7,7 +7,7 @@ import { useTitle } from "../hooks";
 export const AuthorQuote = () => {
   const location = useLocation();
   const navigate = useNavigate();
- 
+
   // Get the initial values from location.state or use empty values as fallback
   const state = location.state || {};
   const {
@@ -24,26 +24,27 @@ export const AuthorQuote = () => {
 
   // Get author name from URL or location.state
   const decodedPath = decodeURIComponent(location.pathname.split("/").pop());
-  const name = stateName || decodedPath.replace(/-/g, ' '); // Convertir les tirets en espaces
-  
+  const name = stateName || decodedPath.replace(/-/g, " "); // Convertir les tirets en espaces
+
   // Si on a un state, c'est qu'on vient de la navigation interne, sinon on doit charger depuis l'API
   const shouldLoadFromAPI = Object.keys(state).length === 0;
- const title = `Quoter - ${name}`;
+  const title = `Quoter - ${name}`;
   useTitle({ title });
   // Find the author in the authors array
-  const author = authors.find((a) => 
-    a.name.toLowerCase() === name.toLowerCase() || 
-    a.name.toLowerCase().replace(/ /g, '-') === decodedPath.toLowerCase()
+  const author = authors.find(
+    (a) =>
+      a.name.toLowerCase() === name.toLowerCase() ||
+      a.name.toLowerCase().replace(/ /g, "-") === decodedPath.toLowerCase()
   );
-  
+
   // Rediriger vers la page d'erreur si l'auteur n'est pas trouvé
   useEffect(() => {
     if (shouldLoadFromAPI && !author) {
       // Vous pouvez aussi rediriger vers une page d'erreur personnalisée
-      navigate('/not-found');
+      navigate("/not-found");
     }
   }, [shouldLoadFromAPI, author, navigate]);
-  
+
   if (!author && shouldLoadFromAPI) {
     // Afficher un loader pendant la redirection
     return (
@@ -204,8 +205,8 @@ export const AuthorQuote = () => {
                     <p className="text-xs uppercase tracking-wider font-medium text-gray-600 mb-1">
                       Nationalité
                     </p>
-                    <p className="font-bold text-gray-900 text-base truncate group-hover:text-gray-900">
-                      {nationality}
+                    <p className="font-bold text-gray-900 text-base group-hover:text-gray-900 break-words">
+                      {nationality && nationality.replace(/-/g, "\u2011")}
                     </p>
                   </div>
                 </div>
@@ -378,8 +379,12 @@ export const AuthorQuote = () => {
                     <p className="text-xs uppercase tracking-wider font-medium text-gray-600 mb-1">
                       Domaine
                     </p>
-                    <p className="font-bold text-gray-900 text-base  group-hover:text-gray-900">
-                      {domain}
+                    <p className="font-bold text-gray-900 text-base group-hover:text-gray-900 break-words">
+                      {domain.split("/").map((d, i) => (
+                        <span key={i} className="block">
+                          {d.trim()}
+                        </span>
+                      ))}
                     </p>
                   </div>
                 </div>
@@ -477,7 +482,7 @@ export const AuthorQuote = () => {
                     <p className="text-xs uppercase tracking-wider font-medium text-gray-600 mb-1">
                       Connu pour
                     </p>
-                    <p className="font-bold text-gray-900 text-base leading-tight group-hover:text-gray-900">
+                    <p className="font-bold text-gray-900 text-base leading-tight group-hover:text-gray-900 break-words">
                       {knownFor}
                     </p>
                   </div>

@@ -172,7 +172,7 @@ const loader = document.getElementById('loader');
           () => {
             img.style.opacity = "1";
           },
-          { once: true }
+          { once: true },
         );
 
         img.addEventListener(
@@ -181,7 +181,7 @@ const loader = document.getElementById('loader');
             img.style.opacity = "0.3";
             img.style.backgroundColor = "#e8e8e8";
           },
-          { once: true }
+          { once: true },
         );
 
         card.appendChild(img);
@@ -239,7 +239,7 @@ const loader = document.getElementById('loader');
             () => {
               item.imageLoaded = true;
             },
-            { once: true }
+            { once: true },
           );
         }
       }
@@ -561,7 +561,7 @@ const loader = document.getElementById('loader');
                 author?.death,
                 author?.nationality,
                 author?.domain,
-                author?.knownFor
+                author?.knownFor,
               );
             }
             break;

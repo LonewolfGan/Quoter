@@ -23,6 +23,22 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-./scripts
 .vercel
-.env*.local
+.vscode/settings.json
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.code-workspace
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Editor backups
+*.bak
+*.backup
+*.orig
