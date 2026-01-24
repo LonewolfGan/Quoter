@@ -42,3 +42,6 @@ Thumbs.db
 *.bak
 *.backup
 *.orig
+
+/public/authors_backup
+/public/bg_images_backup
