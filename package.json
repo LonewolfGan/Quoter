@@ -16,6 +16,7 @@
     "gsap": "^3.13.0",
     "lucide-react": "^0.561.0",
     "react": "^18.2.0",
+    "react-cookie-consent": "^10.0.1",
     "react-dom": "^18.2.0",
     "react-ga4": "^2.1.0",
     "react-router-dom": "^6.28.0",
