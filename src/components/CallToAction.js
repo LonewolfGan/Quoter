@@ -61,7 +61,7 @@ export const CallToAction = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 mb-20">
       <div className="bg-black text-white rounded-2xl border-2 border-black p-8 text-center mt-12 shadow-xl">
-        <h3 className="text-2xl font-bold mb-4">{content.title}</h3>
+        <h2 className="text-2xl font-bold mb-4">{content.title}</h2>
         <p className="text-lg mb-6 text-gray-300">{content.text}</p>
         <div className="flex flex-wrap gap-4 justify-center">
           {content.buttons.map((btn, index) => (

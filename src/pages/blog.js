@@ -155,10 +155,10 @@ export const Blog = () => {
               {/* Contexte */}
               {dailyArticle.content.context && (
                 <div className="bg-gray-50 rounded-xl p-6 border-2 border-black">
-                  <h4 className="text-xl font-bold mb-3 flex items-center gap-2">
+                  <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
                     <ScrollText size={48} strokeWidth={1} />
                     Contexte Historique
-                  </h4>
+                  </h3>
                   <p className="text-gray-700 leading-relaxed">
                     {dailyArticle.content.context}
                   </p>
@@ -190,7 +190,7 @@ export const Blog = () => {
                 <div className="bg-gray-100 rounded-xl p-6 border-2 border-black">
                   <div className="flex items-center gap-3 mb-4">
                     <ClipboardPen size={48} strokeWidth={1} />
-                    <h4 className="text-xl font-bold">Exercice Pratique</h4>
+                    <h3 className="text-xl font-bold">Exercice Pratique</h3>
                   </div>
                   <p className="text-gray-700 leading-relaxed">
                     {dailyArticle.content.exercise}
@@ -203,7 +203,7 @@ export const Blog = () => {
                 <div className="bg-gray-100 rounded-xl p-6 border-2 border-black">
                   <div className="flex items-center gap-3 mb-4">
                     <Target size={48} strokeWidth={1} />
-                    <h4 className="text-xl font-bold">Conclusion</h4>
+                    <h3 className="text-xl font-bold">Conclusion</h3>
                   </div>
                   <p className="text-gray-700 leading-relaxed">
                     {dailyArticle.content.conclusion}

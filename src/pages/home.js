@@ -28,9 +28,9 @@ export const Home = () => {
     );
   }
   const displayWidth =
-    typeof window !== "undefined" && window.innerWidth < 768 ? 700 : 1200;
+    typeof window !== "undefined" && window.innerWidth < 768 ? 700 : 900;
   const imageUrl = getDisplayUrl(dailyQuote.id, displayWidth);
-  const imageSrcSet = getDisplaySrcSet(dailyQuote.id, [480, 700, 1200]);
+  const imageSrcSet = getDisplaySrcSet(dailyQuote.id, [480, 700, 900]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen py-12 px-4">
@@ -64,6 +64,8 @@ export const Home = () => {
             src={imageUrl}
             srcSet={imageSrcSet}
             sizes="(max-width: 640px) 90vw, 550px"
+            width={550}
+            height={550}
             onError={(e) => {
               e.currentTarget.src = "/placeholder.webp";
             }}
@@ -75,6 +77,8 @@ export const Home = () => {
         <div className="flex flex-row items-center justify-between w-[95%] m-3 p-3 border-2 border-black rounded-xl">
           {/* PARTAGER */}
           <button
+            type="button"
+            aria-label="Partager la citation"
             onClick={(e) => {
               e.preventDefault();
               handleShare(imageUrl, dailyQuote);
@@ -87,6 +91,8 @@ export const Home = () => {
 
           {/* TÉLÉCHARGER */}
           <button
+            type="button"
+            aria-label="Télécharger la citation"
             onClick={(e) => {
               e.preventDefault();
               handleDownload(imageUrl, dailyQuote);
@@ -105,21 +111,21 @@ export const Home = () => {
           <div className="text-4xl mb-3">
             <CircleFadingPlus size={48} strokeWidth={1} />
           </div>
-          <h3 className="text-lg font-bold mb-2">Une nouvelle citation</h3>
+          <h2 className="text-lg font-bold mb-2">Une nouvelle citation</h2>
           <p className="text-gray-600">Chaque jour</p>
         </div>
         <div className="flex flex-col items-center justify-center bg-gray-50 rounded-2xl border-2 border-black p-6 text-center">
           <div className="text-4xl mb-3">
             <LibraryBig size={48} strokeWidth={1} />
           </div>
-          <h3 className="text-lg font-bold mb-2">+ de 5000 citations</h3>
+          <h2 className="text-lg font-bold mb-2">+ de 5000 citations</h2>
           <p className="text-gray-600">Dans notre collection</p>
         </div>
         <div className="flex flex-col items-center justify-center bg-gray-50 rounded-2xl border-2  border-black p-6 text-center">
           <div className="text-4xl mb-3">
             <Sparkles size={48} strokeWidth={1} />
           </div>
-          <h3 className="text-lg font-bold mb-2">Inspiration quotidienne</h3>
+          <h2 className="text-lg font-bold mb-2">Inspiration quotidienne</h2>
           <p className="text-gray-600">Inspirez-vous chaque jour</p>
         </div>
       </div>

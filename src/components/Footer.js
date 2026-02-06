@@ -17,6 +17,8 @@ export const Footer = () => {
                 alt="Quoter Logo"
                 loading="lazy"
                 decoding="async"
+                width={128}
+                height={128}
               />
             </Link>
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
@@ -29,9 +31,9 @@ export const Footer = () => {
           <div className="flex gap-16 md:gap-20">
             {/* Réseaux sociaux */}
             <div>
-              <h3 className="text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+              <h2 className="text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
                 Suivez-nous
-              </h3>
+              </h2>
               <ul className="space-y-3">
                 <li>
                   <a
@@ -66,9 +68,9 @@ export const Footer = () => {
 
             {/* Legal */}
             <div>
-              <h3 className="text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+              <h2 className="text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
                 Légal
-              </h3>
+              </h2>
               <ul className="space-y-3">
                 <li>
                   <Link

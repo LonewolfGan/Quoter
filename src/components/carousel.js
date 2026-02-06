@@ -150,6 +150,10 @@ const loader = document.getElementById('loader');
         img.className = "card__img";
         img.decoding = "async";
         img.draggable = false;
+        img.width = CARD_W;
+        img.height = CARD_H;
+        img.setAttribute("width", CARD_W);
+        img.setAttribute("height", CARD_H);
 
         // Defer priority; increase when near the viewport
         img.loading = "lazy";
@@ -261,6 +265,13 @@ const loader = document.getElementById('loader');
           if (item.el) {
             item.el.style.width = `${CARD_W}px`;
             item.el.style.height = `${CARD_H}px`;
+            const img = item.el.querySelector("img");
+            if (img) {
+              img.width = CARD_W;
+              img.height = CARD_H;
+              img.setAttribute("width", CARD_W);
+              img.setAttribute("height", CARD_H);
+            }
           }
         });
       }

@@ -98,6 +98,8 @@ export const QuoteSection = ({
     <div className="border rounded-xl border-black my-10 pb-10">
       <div className="flex justify-center items-center gap-6 my-10">
         <button
+          type="button"
+          aria-label="Page précédente"
           onClick={() => setPage((p) => Math.max(p - 1, 1))}
           disabled={page === 1}
           className="px-5 py-2 rounded-full border border-black
@@ -110,6 +112,8 @@ export const QuoteSection = ({
           Page {page} / {totalItems}
         </span>
         <button
+          type="button"
+          aria-label="Page suivante"
           onClick={() => setPage((p) => Math.min(p + 1, totalItems))}
           disabled={page >= totalItems}
           className="px-5 py-2 rounded-full border border-black
@@ -131,6 +135,8 @@ export const QuoteSection = ({
                 src={getThumbnailUrl(quote.id, thumbSize)}
                 srcSet={getThumbnailSrcSet(quote.id, [200, 280, 350])}
                 sizes="(max-width: 768px) 45vw, 350px"
+                width={thumbSize}
+                height={thumbSize}
                 onError={(e) => {
                   if (!e.currentTarget.src.includes("quote_images")) {
                     // Fallback to default URL
@@ -163,6 +169,7 @@ export const QuoteSection = ({
           {/* NAVIGATION BUTTONS */}
           <button
             aria-disabled={selectedQuoteIndex === 0}
+            aria-label="Citation précédente"
             key={selectedQuoteIndex}
             className={`absolute left-2 md:left-8 text-white z-[60] p-2 rounded-full transition-all
     hover:text-gray-300 hover:bg-white/10
@@ -175,6 +182,7 @@ export const QuoteSection = ({
               setSelectedQuoteIndex((prev) => (prev > 0 ? prev - 1 : prev));
             }}
             disabled={selectedQuoteIndex === 0}
+            type="button"
           >
             <svg
               width="40"
@@ -194,6 +202,7 @@ export const QuoteSection = ({
 
           <button
             aria-disabled={selectedQuoteIndex === allUniqueQuotes.length - 1}
+            aria-label="Citation suivante"
             key={selectedQuoteIndex}
             className={`absolute right-2 md:right-8 text-white z-[60] p-2 rounded-full transition-all
     hover:text-gray-300 hover:bg-white/10
@@ -210,6 +219,7 @@ export const QuoteSection = ({
               );
             }}
             disabled={selectedQuoteIndex === allUniqueQuotes.length - 1}
+            type="button"
           >
             <svg
               width="40"
@@ -232,6 +242,7 @@ export const QuoteSection = ({
             className="absolute top-4 right-4 text-white text-5xl font-light hover:text-zinc-300 transition-colors z-[60] border border-white rounded-2xl px-2"
             onClick={() => setSelectedQuoteIndex(null)}
             aria-label="Close"
+            type="button"
           >
             &times;
           </button>
@@ -245,6 +256,8 @@ export const QuoteSection = ({
                 src={currentImageUrl}
                 srcSet={currentImageSrcSet}
                 sizes="(max-width: 768px) 90vw, 900px"
+                width={900}
+                height={900}
                 onError={(e) => {
                   e.currentTarget.src = "/placeholder.webp";
                 }}

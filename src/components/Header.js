@@ -44,6 +44,7 @@ export const Header = () => {
       return isHiDpi ? `/bg_images/${id}.webp` : `/bg_images/1280/${id}.webp`;
     });
   }, [isMobile, isHiDpi]);
+  const isHome = location.pathname === "/";
 
   // Précharge seulement les images proches pour limiter le coût initial
   useEffect(() => {
@@ -281,6 +282,8 @@ export const Header = () => {
                 alt="logo"
                 loading="eager"
                 decoding="async"
+                width={96}
+                height={96}
               />
             </Link>
 
@@ -319,10 +322,16 @@ export const Header = () => {
               alt="logo"
               loading="eager"
               decoding="async"
+              width={96}
+              height={96}
             />
           </Link>
           <div>
             <button
+              type="button"
+              aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
               onClick={() => setMenuOpen(!menuOpen)}
               className="p-2 text-gray-700 rounded-full outline-none focus:border-black focus:border transition-transform hover:scale-110"
             >
@@ -362,6 +371,7 @@ export const Header = () => {
 
           {/* Menu mobile avec animation */}
           <div
+            id="mobile-menu"
             className={`absolute top-full left-0 w-full z-50 bg-white/95 backdrop-blur-sm border-2 border-black rounded-2xl mt-2 p-6 shadow-xl transition-all duration-300 origin-top ${
               menuOpen
                 ? "flex flex-col items-center opacity-100 scale-100"
@@ -407,9 +417,15 @@ export const Header = () => {
         </nav>
 
         <div className="text-center mx-auto flex flex-col items-center justify-center h-full">
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold text-black/75 tracking-tighter uppercase drop-shadow-sm mb-16">
-            L'INSPIRATION SANS LIMITES
-          </h1>
+          {isHome ? (
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold text-black/75 tracking-tighter uppercase drop-shadow-sm mb-16">
+              L'INSPIRATION SANS LIMITES
+            </h1>
+          ) : (
+            <p className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold text-black/75 tracking-tighter uppercase drop-shadow-sm mb-16">
+              L'INSPIRATION SANS LIMITES
+            </p>
+          )}
 
           {/* SEARCH INPUT AU MILIEU */}
           <div className="flex justify-between bg-white/90 backdrop-blur-sm border-black border-2 w-[85%]  rounded-full text-xl p-2 gap-2 shadow-lg">

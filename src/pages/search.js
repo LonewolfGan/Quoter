@@ -28,7 +28,7 @@ export const Search = () => {
         />
       ) : (
         <div className="mt-12 p-6 bg-white rounded-2xl border-2 border-black">
-          <h3 className="text-xl font-bold mb-4">Suggestions :</h3>
+          <h2 className="text-xl font-bold mb-4">Suggestions :</h2>
           <ul className="space-y-2 text-gray-700">
             <li>• Vérifiez l'orthographe des mots-clés</li>
             <li>• Essayez des termes plus généraux</li>

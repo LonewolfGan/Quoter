@@ -91,6 +91,8 @@ export const AuthorQuote = () => {
                 className=" w-[350px] md:w-[450px] rounded-2xl shadow-xl"
                 loading="lazy"
                 decoding="async"
+                width={350}
+                height={450}
               />
             </div>
 
