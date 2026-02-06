@@ -35,7 +35,9 @@ export const ArticleDetail = () => {
         setIsLoading(true);
         const { data, error } = await supabase
           .from("articles")
-          .select("*")
+          .select(
+            "id, title, excerpt, author, category, read_time, published_date, content",
+          )
           .eq("id", id)
           .single();
 

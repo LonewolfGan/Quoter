@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Github, MessageCircle, Shield, FileText } from "lucide-react";
 import logo from "../assets/logo/1.webp";
+import { ResponsiveImage } from "./ResponsiveImage";
 
 export const Footer = () => {
   return (
@@ -10,7 +11,13 @@ export const Footer = () => {
           {/* Logo et description */}
           <div className="flex-shrink-0 max-w-sm">
             <Link to="/" className="inline-block mb-4">
-              <img src={logo} className="w-32 h-auto" alt="Quoter Logo" />
+              <ResponsiveImage
+                src={logo}
+                className="w-32 h-auto"
+                alt="Quoter Logo"
+                loading="lazy"
+                decoding="async"
+              />
             </Link>
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               Découvrez des citations inspirantes et des articles de réflexion

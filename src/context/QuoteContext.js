@@ -123,21 +123,28 @@ export const QuoteProvider = ({ children }) => {
     }
 
     try {
-      const { data: quotes, error: fetchError } = await supabase
+      const { count, error: countError } = await supabase
         .from("quotes")
-        .select("*")
-        .order("id", { ascending: true });
+        .select("id", { count: "exact", head: true });
 
-      if (fetchError) throw fetchError;
-      if (!quotes || quotes.length === 0) {
+      if (countError) throw countError;
+      if (!count || count <= 0) {
         throw new Error("Aucune citation disponible");
       }
 
       const now = new Date();
       const startOfYear = new Date(now.getFullYear(), 0, 0);
       const dayOfYear = Math.floor((now - startOfYear) / 86400000);
-      const index = dayOfYear % quotes.length;
-      const quote = quotes[index];
+      const index = dayOfYear % count;
+
+      const { data: quote, error: quoteError } = await supabase
+        .from("quotes")
+        .select("id, quote_text, quote_author, category")
+        .order("id", { ascending: true })
+        .range(index, index)
+        .single();
+
+      if (quoteError) throw quoteError;
 
       if (!quote) throw new Error("Citation invalide");
 
@@ -273,18 +280,6 @@ export const QuoteProvider = ({ children }) => {
       isLoadingRef.current = false;
     };
   }, [currentDate, loadDailyQuote, loadOrGenerateArticle]);
-
-  useEffect(() => {
-    const checkDate = () => {
-      const today = new Date().toISOString().split("T")[0];
-      if (today !== currentDate) {
-        setCurrentDate(today);
-      }
-    };
-
-    const interval = setInterval(checkDate, 60000);
-    return () => clearInterval(interval);
-  }, [currentDate]);
 
   return (
     <QuoteContext.Provider

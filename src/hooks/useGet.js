@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
 
-export const useGet = ({ query, name, category }) => {
+export const useGet = ({ query, name, category, enabled = true }) => {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -14,7 +14,8 @@ export const useGet = ({ query, name, category }) => {
       const normalize = (str) =>
         str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
 
-      let supabaseQuery = supabase.from("quotes").select("*");
+      const selectFields = "id, quote_text, quote_author, category";
+      let supabaseQuery = supabase.from("quotes").select(selectFields);
 
       // Filtre par auteur (partial match) - Gestion des accents
       if (name) {
@@ -58,8 +59,9 @@ export const useGet = ({ query, name, category }) => {
     }
   }, [query, name, category]);
   useEffect(() => {
+    if (!enabled) return;
     fetchQuotes();
-  }, [fetchQuotes]);
+  }, [fetchQuotes, enabled]);
 
   return { data, isLoading, error, count: data?.length || 0 };
 };

@@ -1,31 +1,36 @@
 import { supabase } from "../utils/supabaseClient";
 import { ClipboardPen, ScrollText, Sparkles, Target } from "lucide-react";
 import authors from "../assets/authors";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuote } from "../context/QuoteContext";
 import { useTitle } from "../hooks";
+
+const normalize = (str) =>
+  str
+    .trim()
+    .normalize("NFD") // décompose les accents (é → e + ◌́)
+    .replace(/[\u0300-\u036f]/g, "") // enlève les accents
+    .toLowerCase();
 
 export const Blog = () => {
   const { dailyQuote, dailyArticle, isLoading, isGenerating } = useQuote();
   const [allArticles, setAllArticles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const articlesPerPage = window.innerWidth < 768 ? 5 : 9;
+  const [articlesPerPage, setArticlesPerPage] = useState(
+    typeof window !== "undefined" && window.innerWidth < 768 ? 5 : 9,
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const title = "Quoter - Blog";
   useTitle({ title });
 
-  const normalize = (str) =>
-    str
-      .trim()
-      .normalize("NFD") // décompose les accents (é → e + ◌́)
-      .replace(/[\u0300-\u036f]/g, "") // enlève les accents
-      .toLowerCase();
   const loadAllArticles = async () => {
     try {
       const { data, error } = await supabase
         .from("articles")
-        .select("*")
+        .select(
+          "id, title, excerpt, author, category, published_date, read_time",
+        )
         .order("published_date", { ascending: false })
         .limit(50);
 
@@ -44,23 +49,37 @@ export const Blog = () => {
       loadAllArticles();
     }
   }, [dailyArticle, isGenerating]);
+  useEffect(() => {
+    const handleResize = () => {
+      setArticlesPerPage(window.innerWidth < 768 ? 5 : 9);
+    };
 
-  const filteredArticles = allArticles.filter((article) => {
-    const matchesSearch =
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      normalize(article.author)
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-    return matchesSearch;
-  });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const filteredArticles = useMemo(() => {
+    if (!allArticles || allArticles.length === 0) return [];
+    const queryLower = searchQuery.trim().toLowerCase();
+    const queryNorm = normalize(searchQuery || "");
+    if (!queryLower) return allArticles;
+    return allArticles.filter((article) => {
+      const title = article.title?.toLowerCase() || "";
+      const excerpt = article.excerpt?.toLowerCase() || "";
+      const authorNorm = normalize(article.author || "");
+      return (
+        title.includes(queryLower) ||
+        excerpt.includes(queryLower) ||
+        authorNorm.includes(queryNorm)
+      );
+    });
+  }, [allArticles, searchQuery]);
 
   const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
   const startIndex = (currentPage - 1) * articlesPerPage;
-  const paginatedArticles = filteredArticles.slice(
-    startIndex,
-    startIndex + articlesPerPage
-  );
+  const paginatedArticles = useMemo(() => {
+    return filteredArticles.slice(startIndex, startIndex + articlesPerPage);
+  }, [filteredArticles, startIndex, articlesPerPage]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -198,7 +217,7 @@ export const Blog = () => {
                   to={(() => {
                     const matchedAuthor = authors.find(
                       (a) =>
-                        normalize(a.name) === normalize(dailyArticle.author)
+                        normalize(a.name) === normalize(dailyArticle.author),
                     );
                     return matchedAuthor
                       ? `/authors/${matchedAuthor.name}`
@@ -208,7 +227,7 @@ export const Blog = () => {
                 >
                   Plus de{" "}
                   {authors.some(
-                    (a) => normalize(a.name) === normalize(dailyArticle.author)
+                    (a) => normalize(a.name) === normalize(dailyArticle.author),
                   )
                     ? dailyArticle.author
                     : "nos auteurs"}
@@ -263,7 +282,7 @@ export const Blog = () => {
                           <div className="flex items-center justify-between mb-3">
                             <span className="text-xs text-gray-500">
                               {new Date(
-                                article.published_date
+                                article.published_date,
                               ).toLocaleDateString("fr-FR", {
                                 day: "numeric",
                                 month: "short",
@@ -281,9 +300,11 @@ export const Blog = () => {
                             {article.excerpt}
                           </p>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="inline-block px-3 py-1 bg-black text-white rounded-full text-xs font-medium">
-                              {article.author}
-                            </span>
+                            {article.author && (
+                              <span className="inline-block px-3 py-1 bg-black text-white rounded-full text-xs font-medium">
+                                {article.author}
+                              </span>
+                            )}
                             {article.category && (
                               <span className="inline-block px-3 py-1 bg-gray-100 rounded-full text-xs font-medium">
                                 {article.category}

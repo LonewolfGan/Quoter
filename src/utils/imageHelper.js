@@ -54,9 +54,9 @@ export const buildCloudinaryUrl = (quoteId, options = {}) => {
  * @param {string} quoteId - L'ID de la citation
  * @returns {string} URL optimisée pour l'affichage
  */
-export const getDisplayUrl = (quoteId) => {
+export const getDisplayUrl = (quoteId, width = 1200) => {
   return buildCloudinaryUrl(quoteId, {
-    width: "1200",
+    width: width.toString(),
     height: "none",
     quality: "auto",
     format: "auto",
@@ -79,6 +79,46 @@ export const getThumbnailUrl = (quoteId, size = 350) => {
     crop: "limit",
     gravity: "none",
   });
+};
+
+/**
+ * Génère un srcSet Cloudinary pour l'affichage
+ * @param {string} quoteId
+ * @param {number[]} widths
+ * @returns {string}
+ */
+export const getDisplaySrcSet = (quoteId, widths = [480, 700, 1200]) => {
+  return widths.map((w) => `${getDisplayUrl(quoteId, w)} ${w}w`).join(", ");
+};
+
+/**
+ * Génère un srcSet Cloudinary pour les thumbnails
+ * @param {string} quoteId
+ * @param {number[]} widths
+ * @returns {string}
+ */
+export const getThumbnailSrcSet = (quoteId, widths = [200, 280, 350]) => {
+  return widths.map((w) => `${getThumbnailUrl(quoteId, w)} ${w}w`).join(", ");
+};
+
+/**
+ * Construit un srcSet pour les auteurs à partir du fichier d'origine
+ * @param {string} src - chemin original /authors/Name.webp
+ * @param {number[]} widths
+ * @returns {{src: string, srcSet: string, sizes: string}}
+ */
+export const getAuthorSrcSet = (
+  src,
+  widths = [320, 640],
+  sizes = "(max-width: 768px) 70vw, 350px",
+) => {
+  if (!src) return { src: "", srcSet: "", sizes };
+  const file = src.split("/").pop();
+  const srcSet = widths
+    .map((w) => `/authors/${w}/${file} ${w}w`)
+    .join(", ");
+  const fallback = `/authors/${widths[widths.length - 1]}/${file}`;
+  return { src: fallback, srcSet, sizes };
 };
 
 /**
@@ -169,6 +209,9 @@ const imageHelperUtils = {
   buildCloudinaryUrl,
   getDisplayUrl,
   getThumbnailUrl,
+  getDisplaySrcSet,
+  getThumbnailSrcSet,
+  getAuthorSrcSet,
   getDefaultUrl,
   generateFileName,
   getDownloadFileName,

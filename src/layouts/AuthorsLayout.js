@@ -39,16 +39,15 @@ export const AuthorsLayout = () => {
 
   return (
     <main>
-      {/* Carousel reste monté mais caché quand on est sur authorQuote */}
-      <div
-        style={{ display: showCarousel ? "block" : "none" }}
-        className="flex justify-center items-center m-auto h-full"
-      >
-        <h1 className="text-6xl md:text-9xl leading-10 font-black text-center mt-20">
-          Authors
-        </h1>
-        <Carousel3D onCardClick={handleCardClick} />
-      </div>
+      {/* Carousel uniquement sur /authors pour éviter les listeners/RAF inutiles */}
+      {showCarousel ? (
+        <div className="flex flex-col items-center m-auto h-full">
+          <h1 className="text-6xl md:text-9xl leading-10 font-black text-center mt-20">
+            Authors
+          </h1>
+          <Carousel3D onCardClick={handleCardClick} />
+        </div>
+      ) : null}
 
       {/* Pages enfants (authorQuote) s'affichent ici */}
       <Outlet />

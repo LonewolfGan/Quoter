@@ -1,9 +1,23 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import logo from "../assets/logo/1.webp";
+import { ResponsiveImage } from "./ResponsiveImage";
 
 // Les images sont maintenant dans le dossier public/bg_images
-const images = Array.from({length: 10}, (_, i) => `/bg_images/${61 + i}.webp`);
+const imageIds = Array.from({ length: 10 }, (_, i) => 61 + i);
+
+const categories = [
+  "Amour",
+  "Amitié",
+  "Bonheur",
+  "Vie",
+  "Motivation",
+  "Réussite",
+  "Philosophie",
+  "Sagesse",
+  "Liberté",
+  "Espoir",
+].sort();
 
 export const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -16,82 +30,90 @@ export const Header = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const categories = [
-    "Amour",
-    "Amitié",
-    "Bonheur",
-    "Vie",
-    "Motivation",
-    "Réussite",
-    "Philosophie",
-    "Sagesse",
-    "Liberté",
-    "Espoir",
-  ].sort();
-  // Effet pour le préchargement des images
+  const preloadedRef = useRef(new Set());
+  const currentIndexRef = useRef(0);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+  );
+  const isHiDpi =
+    typeof window !== "undefined" ? window.devicePixelRatio > 1.5 : false;
+
+  const images = useMemo(() => {
+    return imageIds.map((id) => {
+      if (isMobile) return `/bg_images/640/${id}.webp`;
+      return isHiDpi ? `/bg_images/${id}.webp` : `/bg_images/1280/${id}.webp`;
+    });
+  }, [isMobile, isHiDpi]);
+
+  // Précharge seulement les images proches pour limiter le coût initial
   useEffect(() => {
-    let isMounted = true;
-    
     const preloadImage = (index) => {
-      if (index >= images.length || !isMounted) return;
-
+      if (index < 0 || index >= images.length) return;
+      const src = images[index];
+      if (preloadedRef.current.has(src)) return;
       const img = new Image();
-      img.src = images[index];
-
-      img.onload = () => {
-        if (isMounted) {
-          // Ajouter un léger délai entre chaque préchargement
-          setTimeout(() => preloadImage(index + 1), 50);
-        }
-      };
-      
-      img.onerror = (e) => {
-        console.error(`Erreur de chargement de l'image: ${images[index]}`, e);
-        if (isMounted) preloadImage(index + 1);
-      };
+      img.src = src;
+      preloadedRef.current.add(src);
     };
 
     preloadImage(0);
-    
-    return () => {
-      isMounted = false;
+    preloadImage(1);
+  }, [images]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
     };
-  }, []);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [images]);
 
   // Effet pour la rotation des images
   useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
     let timeout1, timeout2;
     let isMounted = true;
     let intervalId;
 
+    const preloadImage = (index) => {
+      if (index < 0 || index >= images.length) return;
+      const src = images[index];
+      if (preloadedRef.current.has(src)) return;
+      const img = new Image();
+      img.src = src;
+      preloadedRef.current.add(src);
+    };
+
     const rotateImages = () => {
       if (!isMounted) return;
-      
-      const next = (currentIndex + 1) % images.length;
+
+      const next = (currentIndexRef.current + 1) % images.length;
+      preloadImage(next);
+      preloadImage((next + 1) % images.length);
       setNextIndex(next);
 
       timeout1 = setTimeout(() => {
-        if (isMounted) {
-          setIsTransitioning(true);
-        }
+        if (isMounted) setIsTransitioning(true);
       }, 50);
 
       timeout2 = setTimeout(() => {
-        if (isMounted) {
-          setCurrentIndex(next);
-          setIsTransitioning(false);
-        }
+        if (!isMounted) return;
+        setCurrentIndex(next);
+        currentIndexRef.current = next;
+        setIsTransitioning(false);
       }, 1550);
     };
 
-    // Démarrer l'intervalle après un court délai initial
     const initialDelay = setTimeout(() => {
-      if (isMounted) {
-        intervalId = setInterval(rotateImages, 8000);
-      }
+      if (!isMounted) return;
+      intervalId = setInterval(rotateImages, 8000);
     }, 1000);
 
-    // Nettoyage
     return () => {
       isMounted = false;
       clearInterval(intervalId);
@@ -99,7 +121,7 @@ export const Header = () => {
       clearTimeout(timeout2);
       clearTimeout(initialDelay);
     };
-  }, [currentIndex]);
+  }, [images]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -128,17 +150,20 @@ export const Header = () => {
             style={{
               backgroundImage: `url(${images[currentIndex]})`,
               opacity: 0.5,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              willChange: 'opacity',
-              transition: 'opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
-              backfaceVisibility: 'hidden',
-              transform: 'translateZ(0)'
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              willChange: "opacity",
+              transition: "opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1)",
+              backfaceVisibility: "hidden",
+              transform: "translateZ(0)",
             }}
             onError={(e) => {
-              console.error('Erreur de chargement de l\'image de fond:', images[currentIndex]);
-              e.target.style.display = 'none';
+              console.error(
+                "Erreur de chargement de l'image de fond:",
+                images[currentIndex],
+              );
+              e.target.style.display = "none";
             }}
           />
         )}
@@ -150,17 +175,20 @@ export const Header = () => {
             style={{
               backgroundImage: `url(${images[nextIndex]})`,
               opacity: isTransitioning ? 0.5 : 0,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              willChange: 'opacity',
-              transition: 'opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1)',
-              backfaceVisibility: 'hidden',
-              transform: 'translateZ(0)'
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              willChange: "opacity",
+              transition: "opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1)",
+              backfaceVisibility: "hidden",
+              transform: "translateZ(0)",
             }}
             onError={(e) => {
-              console.error('Erreur de chargement de l\'image de transition:', images[nextIndex]);
-              e.target.style.display = 'none';
+              console.error(
+                "Erreur de chargement de l'image de transition:",
+                images[nextIndex],
+              );
+              e.target.style.display = "none";
             }}
           />
         )}
@@ -247,7 +275,13 @@ export const Header = () => {
             </div>
 
             <Link to="/" className="transition-transform hover:scale-105">
-              <img className="w-24" src={logo} alt="logo" />
+              <ResponsiveImage
+                className="w-24"
+                src={logo}
+                alt="logo"
+                loading="eager"
+                decoding="async"
+              />
             </Link>
 
             <div className="flex gap-10">
@@ -279,7 +313,13 @@ export const Header = () => {
           className="relative z-10 flex md:hidden justify-between items-center w-[90%] bg-white/95 backdrop-blur-sm border-2 m-2 mx-4 p-2 border-black rounded-full shadow-lg"
         >
           <Link to="/" className="transition-transform hover:scale-105">
-            <img className="w-24" src={logo} alt="logo" />
+            <ResponsiveImage
+              className="w-24"
+              src={logo}
+              alt="logo"
+              loading="eager"
+              decoding="async"
+            />
           </Link>
           <div>
             <button
@@ -366,37 +406,43 @@ export const Header = () => {
           </div>
         </nav>
 
-        {/* SEARCH INPUT AU MILIEU */}
-        <div className="flex justify-between bg-white/90 backdrop-blur-sm border-black border-2 w-[80%] rounded-full text-xl p-2 gap-2 mt-auto mb-auto shadow-lg">
-          <input
-            className="p-2 bg-transparent border-none w-3/4 outline-none placeholder-gray-500"
-            type="text"
-            placeholder="Rechercher......"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                event.stopPropagation();
-                event.target.blur();
-                setSearchQuery("");
+        <div className="text-center mx-auto flex flex-col items-center justify-center h-full">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold text-black/75 tracking-tighter uppercase drop-shadow-sm mb-16">
+            L'INSPIRATION SANS LIMITES
+          </h1>
+
+          {/* SEARCH INPUT AU MILIEU */}
+          <div className="flex justify-between bg-white/90 backdrop-blur-sm border-black border-2 w-[85%]  rounded-full text-xl p-2 gap-2 shadow-lg">
+            <input
+              className="p-2 bg-transparent border-none w-3/4 outline-none placeholder-gray-500"
+              type="text"
+              placeholder="Rechercher......"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  event.target.blur();
+                  setSearchQuery("");
+                  if (searchQuery.trim().length > 0) {
+                    navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+                  }
+                }
+              }}
+            />
+            <button
+              onClick={() => {
                 if (searchQuery.trim().length > 0) {
                   navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+                  setSearchQuery("");
                 }
-              }
-            }}
-          />
-          <button
-            onClick={() => {
-              if (searchQuery.trim().length > 0) {
-                navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-                setSearchQuery("");
-              }
-            }}
-            className="text-white bg-black rounded-full p-2 w-1/4 text-lg sm:text-xl md:text-2xl lg:text-3xl whitespace-nowrap overflow-hidden text-ellipsis hover:bg-gray-800 transition-colors active:scale-95"
-          >
-            Rechercher
-          </button>
+              }}
+              className="text-white bg-black rounded-full p-2 w-1/4 text-lg sm:text-xl md:text-2xl lg:text-3xl whitespace-nowrap overflow-hidden text-ellipsis hover:bg-gray-800 transition-colors active:scale-95"
+            >
+              Rechercher
+            </button>
+          </div>
         </div>
       </div>
     </header>

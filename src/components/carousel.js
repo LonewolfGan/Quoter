@@ -9,6 +9,12 @@ export function Carousel3D({ onCardClick }) {
   const carouselControlsRef = useRef(null); // Ref to expose navigation controls
 
   useEffect(() => {
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobile =
+      typeof window !== "undefined" ? window.innerWidth < 768 : false;
     const stage = stageRef.current;
     const cardsRoot = cardsRef.current;
     const loader = loaderRef.current;
@@ -29,7 +35,7 @@ export function Carousel3D({ onCardClick }) {
     const FRICTION = 0.92; // Less friction for more fluid movement
     const WHEEL_SENS = 0.8; // Increased sensitivity
     const DRAG_SENS = 18; // Increased drag sensitivity
-    const AUTO_SPEED = 150; // Auto-scroll speed (pixels per second) - Increased for fluidity
+    const AUTO_SPEED = prefersReducedMotion ? 0 : 150; // Auto-scroll speed
 
     // Visual constants
     const MAX_ROTATION = 28; // Maximum card rotation in degrees
@@ -145,20 +151,15 @@ const loader = document.getElementById('loader');
         img.decoding = "async";
         img.draggable = false;
 
-        // Optimize loading strategy
-        // Load fewer images eagerly on mobile to prevent blocking
-        const isMobile = window.innerWidth < 768;
-        const EAGER_COUNT = isMobile ? 2 : 5;
-
-        if (i < EAGER_COUNT) {
-          img.loading = "eager";
-          img.fetchPriority = "high";
-        } else {
-          img.loading = "lazy";
-          img.fetchPriority = "auto";
-        }
-
-        img.src = src;
+        // Defer priority; increase when near the viewport
+        img.loading = "lazy";
+        img.fetchPriority = "low";
+        const file = src.split("/").pop();
+        const sm = `/authors/320/${file}`;
+        const md = `/authors/640/${file}`;
+        img.src = isMobile ? sm : md;
+        img.srcset = `${sm} 320w, ${md} 640w`;
+        img.sizes = "(max-width: 768px) 70vw, 350px";
 
         img.style.width = "100%";
         img.style.height = "100%";
@@ -197,7 +198,6 @@ const loader = document.getElementById('loader');
      */
     function preloadNearbyImages(centerIndex) {
       // Reduce preload range on mobile to prevent blocking
-      const isMobile = window.innerWidth < 768;
       const PRELOAD_RANGE = isMobile ? 2 : 4;
 
       for (let offset = -PRELOAD_RANGE; offset <= PRELOAD_RANGE; offset++) {
@@ -215,13 +215,10 @@ const loader = document.getElementById('loader');
         }
 
         // Boost priority for nearby images
-        // Only use eager loading for the very closest images to avoid main thread blocking
         const dist = Math.abs(offset);
         if (dist <= 1) {
-          img.loading = "eager";
           img.fetchPriority = "high";
         } else {
-          img.loading = "lazy";
           img.fetchPriority = "auto";
         }
 
@@ -390,7 +387,7 @@ const loader = document.getElementById('loader');
       SCROLL_X = mod(SCROLL_X + vX * dt, TRACK);
 
       // Apply auto-scroll if not interacting
-      if (!dragging && !isHovered) {
+      if (!dragging && !isHovered && AUTO_SPEED > 0) {
         SCROLL_X = mod(SCROLL_X + AUTO_SPEED * dt, TRACK);
       }
 
@@ -446,6 +443,7 @@ const loader = document.getElementById('loader');
 
     // Mouse wheel scrolling
     function onWheel(e) {
+      if (prefersReducedMotion) return;
       // Allow wheel immediately
       e.preventDefault();
 
@@ -466,11 +464,13 @@ const loader = document.getElementById('loader');
 
     // Hover handling for auto-pause
     function onMouseEnter() {
+      if (prefersReducedMotion) return;
       isHovered = true;
     }
     stage.addEventListener("mouseenter", onMouseEnter);
 
     function onMouseLeave() {
+      if (prefersReducedMotion) return;
       isHovered = false;
     }
     stage.addEventListener("mouseleave", onMouseLeave);
@@ -501,6 +501,7 @@ const loader = document.getElementById('loader');
 
     // Pointer move - update scroll position
     function onPointerMove(e) {
+      if (prefersReducedMotion) return;
       if (!dragging) return;
 
       const now = performance.now();
@@ -567,7 +568,7 @@ const loader = document.getElementById('loader');
             break;
           }
         }
-      } else {
+      } else if (!prefersReducedMotion) {
         vX = -lastDelta * DRAG_SENS; // Apply final velocity
       }
 
@@ -587,7 +588,7 @@ const loader = document.getElementById('loader');
       if (document.hidden) {
         cancelCarousel();
       } else {
-        startCarousel();
+        if (!prefersReducedMotion) startCarousel();
       }
     }
     document.addEventListener("visibilitychange", onVisibilityChange);
@@ -614,7 +615,7 @@ const loader = document.getElementById('loader');
 
       // 3. START IMMEDIATELY
       if (loader) loader.classList.add("loader--hide");
-      startCarousel();
+      if (!prefersReducedMotion) startCarousel();
 
       // 4. Animate entry in parallel (non-blocking)
       const viewportWidth = window.innerWidth;
@@ -630,14 +631,20 @@ const loader = document.getElementById('loader');
       }
       visibleCards.sort((a, b) => a.screenX - b.screenX);
 
-      // Simple fade in for initial cards
-      visibleCards.forEach(({ item }, idx) => {
-        item.el.style.opacity = "0";
-        setTimeout(() => {
-          item.el.style.transition = "opacity 0.5s ease-out";
+      // Simple fade in for initial cards (disabled for reduced motion)
+      if (!prefersReducedMotion) {
+        visibleCards.forEach(({ item }, idx) => {
+          item.el.style.opacity = "0";
+          setTimeout(() => {
+            item.el.style.transition = "opacity 0.5s ease-out";
+            item.el.style.opacity = "1";
+          }, idx * 50);
+        });
+      } else {
+        visibleCards.forEach(({ item }) => {
           item.el.style.opacity = "1";
-        }, idx * 50);
-      });
+        });
+      }
 
       // 5. Initial setup without blocking
       // Find and set initial centered card

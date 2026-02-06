@@ -3,6 +3,8 @@ import { useEffect } from "react";
 import { QuoteSection } from "../components/QuoteSection";
 import authors from "../assets/authors";
 import { useTitle } from "../hooks";
+import { getAuthorSrcSet } from "../utils/imageHelper";
+import { ResponsiveImage } from "../components/ResponsiveImage";
 
 export const AuthorQuote = () => {
   const location = useLocation();
@@ -55,6 +57,8 @@ export const AuthorQuote = () => {
   }
 
   const imageUrl = stateImageUrl || author?.image || "";
+  const { src: authorSrc, srcSet: authorSrcSet, sizes: authorSizes } =
+    getAuthorSrcSet(imageUrl, [320, 640], "(max-width: 768px) 90vw, 450px");
   const imageIndex = stateImageIndex || author?.imageIndex || name;
   const bio = stateBio || author?.bio || "";
   const birth = stateBirth || author?.birth || "";
@@ -79,10 +83,14 @@ export const AuthorQuote = () => {
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-40 items-center mt-10">
             {/* IMAGE */}
             <div className="flex justify-center">
-              <img
-                src={imageUrl}
+              <ResponsiveImage
+                src={authorSrc || imageUrl}
+                srcSet={authorSrcSet}
+                sizes={authorSizes}
                 alt={`CarouselImage ${imageIndex}`}
                 className=" w-[350px] md:w-[450px] rounded-2xl shadow-xl"
+                loading="lazy"
+                decoding="async"
               />
             </div>
 

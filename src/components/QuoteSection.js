@@ -2,14 +2,36 @@ import { useGet } from "../hooks/useGet";
 import { useState, useEffect, useMemo } from "react";
 import { useDownload } from "../hooks/useDownload";
 import { useShare } from "../hooks/useShare";
-import { getDisplayUrl, getThumbnailUrl } from "../utils/imageHelper";
+import {
+  getDisplayUrl,
+  getThumbnailUrl,
+  getDisplaySrcSet,
+  getThumbnailSrcSet,
+} from "../utils/imageHelper";
+import { ResponsiveImage } from "./ResponsiveImage";
 
-export const QuoteSection = ({ query, name, category }) => {
-  const size = 350;
-  const { data, isLoading } = useGet({ query, name, category });
+export const QuoteSection = ({
+  query,
+  name,
+  category,
+  data: externalData,
+  isLoading: externalLoading,
+  fetchEnabled = true,
+}) => {
+  const [thumbSize, setThumbSize] = useState(
+    typeof window !== "undefined" && window.innerWidth < 768 ? 280 : 350,
+  );
+  const { data: fetchedData, isLoading: fetchedLoading } = useGet({
+    query,
+    name,
+    category,
+    enabled: fetchEnabled,
+  });
+  const data = fetchEnabled ? fetchedData : externalData;
+  const isLoading = fetchEnabled ? fetchedLoading : externalLoading ?? false;
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(
-    window.innerWidth < 768 ? 4 : 8
+    window.innerWidth < 768 ? 4 : 8,
   );
   const [selectedQuoteIndex, setSelectedQuoteIndex] = useState(null);
 
@@ -18,7 +40,9 @@ export const QuoteSection = ({ query, name, category }) => {
 
   useEffect(() => {
     const handleResize = () => {
-      setItemsPerPage(window.innerWidth < 768 ? 4 : 8);
+      const isMobile = window.innerWidth < 768;
+      setItemsPerPage(isMobile ? 4 : 8);
+      setThumbSize(isMobile ? 280 : 350);
     };
 
     window.addEventListener("resize", handleResize);
@@ -29,8 +53,8 @@ export const QuoteSection = ({ query, name, category }) => {
     return data
       ? Array.from(
           new Map(
-            data.map((q) => [q.quote_text?.trim().toLowerCase(), q])
-          ).values()
+            data.map((q) => [q.quote_text?.trim().toLowerCase(), q]),
+          ).values(),
         )
       : [];
   }, [data]);
@@ -48,6 +72,9 @@ export const QuoteSection = ({ query, name, category }) => {
 
   // Optimized URL for Modal using image helper
   const currentImageUrl = currentQuote ? getDisplayUrl(currentQuote.id) : null;
+  const currentImageSrcSet = currentQuote
+    ? getDisplaySrcSet(currentQuote.id, [700, 1200, 1600])
+    : "";
 
   // Preload next and previous images
   useEffect(() => {
@@ -97,11 +124,13 @@ export const QuoteSection = ({ query, name, category }) => {
           paginatedQuotes.map((quote, index) => (
             <div
               key={`${page}-${quote.id}-${index}`}
-              className={`w-[${size}px] h-[${size}px] border border-black rounded-xl 
-                   flex items-center justify-center overflow-hidden bg-white`}
+              className="border border-black rounded-xl flex items-center justify-center overflow-hidden bg-white"
+              style={{ width: thumbSize, height: thumbSize }}
             >
-              <img
-                src={getThumbnailUrl(quote.id, size)}
+              <ResponsiveImage
+                src={getThumbnailUrl(quote.id, thumbSize)}
+                srcSet={getThumbnailSrcSet(quote.id, [200, 280, 350])}
+                sizes="(max-width: 768px) 45vw, 350px"
                 onError={(e) => {
                   if (!e.currentTarget.src.includes("quote_images")) {
                     // Fallback to default URL
@@ -117,6 +146,9 @@ export const QuoteSection = ({ query, name, category }) => {
                   setSelectedQuoteIndex(actualIndex);
                 }}
                 className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+                fetchPriority="low"
+                decoding="async"
                 alt=""
               />
             </div>
@@ -174,7 +206,7 @@ export const QuoteSection = ({ query, name, category }) => {
             onClick={(e) => {
               e.stopPropagation();
               setSelectedQuoteIndex((prev) =>
-                prev < allUniqueQuotes.length - 1 ? prev + 1 : prev
+                prev < allUniqueQuotes.length - 1 ? prev + 1 : prev,
               );
             }}
             disabled={selectedQuoteIndex === allUniqueQuotes.length - 1}
@@ -209,14 +241,18 @@ export const QuoteSection = ({ query, name, category }) => {
           >
             {/* IMAGE */}
             <div className="flex-1 w-full flex items-center justify-center overflow-hidden rounded-xl">
-              <img
+              <ResponsiveImage
                 src={currentImageUrl}
+                srcSet={currentImageSrcSet}
+                sizes="(max-width: 768px) 90vw, 900px"
                 onError={(e) => {
                   e.currentTarget.src = "/placeholder.webp";
                 }}
                 alt="Enlarged view"
                 className="max-h-full max-w-full object-contain"
-                loading="lazy"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
             </div>
 

@@ -1,6 +1,7 @@
 import { useDownload, useShare, useTitle } from "../hooks/index";
 import { useQuote } from "../context/QuoteContext";
-import { getDisplayUrl } from "../utils/imageHelper";
+import { getDisplayUrl, getDisplaySrcSet } from "../utils/imageHelper";
+import { ResponsiveImage } from "../components/ResponsiveImage";
 
 import {
   Share2,
@@ -26,7 +27,10 @@ export const Home = () => {
       </div>
     );
   }
-  const imageUrl = getDisplayUrl(dailyQuote.id);
+  const displayWidth =
+    typeof window !== "undefined" && window.innerWidth < 768 ? 700 : 1200;
+  const imageUrl = getDisplayUrl(dailyQuote.id, displayWidth);
+  const imageSrcSet = getDisplaySrcSet(dailyQuote.id, [480, 700, 1200]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen py-12 px-4">
@@ -52,10 +56,14 @@ export const Home = () => {
       <div className="flex flex-col items-center justify-center border-2 border-black rounded-xl mb-12 mx-2">
         {/* IMAGE */}
         <div className="p-2 w-[300px] h-[300px] sm:w-[450px] sm:h-[450px] md:w-[500px] md:h-[500px] lg:w-[550px] lg:h-[550px] box-border">
-          <img
+          <ResponsiveImage
             className="w-full h-full object-cover border-2 border-black rounded-xl"
-            loading="lazy"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             src={imageUrl}
+            srcSet={imageSrcSet}
+            sizes="(max-width: 640px) 90vw, 550px"
             onError={(e) => {
               e.currentTarget.src = "/placeholder.webp";
             }}

@@ -5,7 +5,8 @@ export const Search = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q");
-  const { data } = useGet({ query: query });
+  const hasQuery = !!query && query.trim().length > 0;
+  const { data, isLoading } = useGet({ query: query, enabled: hasQuery });
   return (
     <main className="min-h-screen p-8">
       <button
@@ -19,7 +20,12 @@ export const Search = () => {
         Resultas pour " {query} "
       </h1>
       {data === null ? null : data.length > 0 ? (
-        <QuoteSection query={query} />
+        <QuoteSection
+          query={query}
+          data={data}
+          isLoading={isLoading}
+          fetchEnabled={false}
+        />
       ) : (
         <div className="mt-12 p-6 bg-white rounded-2xl border-2 border-black">
           <h3 className="text-xl font-bold mb-4">Suggestions :</h3>
