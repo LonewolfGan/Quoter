@@ -4,9 +4,9 @@ import { useDownload } from "../hooks/useDownload";
 import { useShare } from "../hooks/useShare";
 import {
   getDisplayUrl,
-  getThumbnailUrl,
+  getSquareUrl,
   getDisplaySrcSet,
-  getThumbnailSrcSet,
+  getSquareSrcSet,
 } from "../utils/imageHelper";
 import { ResponsiveImage } from "./ResponsiveImage";
 
@@ -132,8 +132,8 @@ export const QuoteSection = ({
               style={{ width: thumbSize, height: thumbSize }}
             >
               <ResponsiveImage
-                src={getThumbnailUrl(quote.id, thumbSize)}
-                srcSet={getThumbnailSrcSet(quote.id, [200, 280, 350])}
+                src={getSquareUrl(quote.id, thumbSize)}
+                srcSet={getSquareSrcSet(quote.id, [200, 280, 350])}
                 sizes="(max-width: 768px) 45vw, 350px"
                 width={thumbSize}
                 height={thumbSize}

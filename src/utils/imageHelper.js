@@ -22,6 +22,7 @@ export const buildCloudinaryUrl = (quoteId, options = {}) => {
     format = "auto",
     crop = "limit",
     gravity = "auto",
+    background = "none",
     denyPublicId = false,
   } = options;
 
@@ -36,6 +37,7 @@ export const buildCloudinaryUrl = (quoteId, options = {}) => {
     if (crop !== "none") transforms.push(`c_${crop}`);
     if (gravity !== "none" && crop === "fill") transforms.push(`g_${gravity}`);
   }
+  if (background !== "none") transforms.push(`b_${background}`);
 
   // Si denyPublicId est true, on ajoute une protection pour empêcher l'accès direct
   if (denyPublicId) {
@@ -99,6 +101,34 @@ export const getDisplaySrcSet = (quoteId, widths = [480, 700, 1200]) => {
  */
 export const getThumbnailSrcSet = (quoteId, widths = [200, 280, 350]) => {
   return widths.map((w) => `${getThumbnailUrl(quoteId, w)} ${w}w`).join(", ");
+};
+
+/**
+ * URLs carrées (padding auto) pour éviter les ratios incorrects
+ * @param {string} quoteId
+ * @param {number} size
+ * @returns {string}
+ */
+export const getSquareUrl = (quoteId, size = 350) => {
+  return buildCloudinaryUrl(quoteId, {
+    width: size.toString(),
+    height: size.toString(),
+    quality: "auto",
+    format: "auto",
+    crop: "pad",
+    gravity: "none",
+    background: "auto",
+  });
+};
+
+/**
+ * srcSet carré (padding auto)
+ * @param {string} quoteId
+ * @param {number[]} widths
+ * @returns {string}
+ */
+export const getSquareSrcSet = (quoteId, widths = [200, 280, 350]) => {
+  return widths.map((w) => `${getSquareUrl(quoteId, w)} ${w}w`).join(", ");
 };
 
 /**
@@ -211,6 +241,8 @@ const imageHelperUtils = {
   getThumbnailUrl,
   getDisplaySrcSet,
   getThumbnailSrcSet,
+  getSquareUrl,
+  getSquareSrcSet,
   getAuthorSrcSet,
   getDefaultUrl,
   generateFileName,

@@ -1,6 +1,6 @@
 import { useDownload, useShare, useTitle } from "../hooks/index";
 import { useQuote } from "../context/QuoteContext";
-import { getDisplayUrl, getDisplaySrcSet } from "../utils/imageHelper";
+import { getSquareUrl, getSquareSrcSet } from "../utils/imageHelper";
 import { ResponsiveImage } from "../components/ResponsiveImage";
 
 import {
@@ -29,8 +29,8 @@ export const Home = () => {
   }
   const displayWidth =
     typeof window !== "undefined" && window.innerWidth < 768 ? 700 : 900;
-  const imageUrl = getDisplayUrl(dailyQuote.id, displayWidth);
-  const imageSrcSet = getDisplaySrcSet(dailyQuote.id, [480, 700, 900]);
+  const imageUrl = getSquareUrl(dailyQuote.id, displayWidth);
+  const imageSrcSet = getSquareSrcSet(dailyQuote.id, [480, 700, 900]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen py-12 px-4">
