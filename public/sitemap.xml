@@ -4,7 +4,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://ezo.qzz.io/</loc>
-    <lastmod>2026-02-05</lastmod>
+    <lastmod>2026-02-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,57 +12,92 @@
   <!-- Main Routes -->
   <url>
     <loc>https://ezo.qzz.io/categories</loc>
-    <lastmod>2026-02-05</lastmod>
+    <lastmod>2026-02-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://ezo.qzz.io/authors</loc>
+    <lastmod>2026-02-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://ezo.qzz.io/blog</loc>
-    <lastmod>2026-02-05</lastmod>
+    <lastmod>2026-02-06</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <url>
-    <loc>https://ezo.qzz.io/search</loc>
-    <lastmod>2026-02-05</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
   <!-- Main Categories (expand as needed) -->
   <url>
+    <loc>https://ezo.qzz.io/categories/Amour</loc>
+    <lastmod>2026-02-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://ezo.qzz.io/categories/Amiti%C3%A9</loc>
+    <lastmod>2026-02-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://ezo.qzz.io/categories/Bonheur</loc>
+    <lastmod>2026-02-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://ezo.qzz.io/categories/Espoir</loc>
+    <lastmod>2026-02-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://ezo.qzz.io/categories/Libert%C3%A9</loc>
+    <lastmod>2026-02-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://ezo.qzz.io/categories/Motivation</loc>
-    <lastmod>2026-02-05</lastmod>
+    <lastmod>2026-02-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://ezo.qzz.io/categories/Inspiration</loc>
-    <lastmod>2026-02-05</lastmod>
+    <loc>https://ezo.qzz.io/categories/Philosophie</loc>
+    <lastmod>2026-02-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://ezo.qzz.io/categories/Wisdom</loc>
-    <lastmod>2026-02-05</lastmod>
+    <loc>https://ezo.qzz.io/categories/R%C3%A9ussite</loc>
+    <lastmod>2026-02-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://ezo.qzz.io/categories/Success</loc>
-    <lastmod>2026-02-05</lastmod>
+    <loc>https://ezo.qzz.io/categories/Sagesse</loc>
+    <lastmod>2026-02-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://ezo.qzz.io/categories/Life</loc>
-    <lastmod>2026-02-05</lastmod>
+    <loc>https://ezo.qzz.io/categories/Vie</loc>
+    <lastmod>2026-02-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

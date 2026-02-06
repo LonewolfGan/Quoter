@@ -17,8 +17,8 @@ export const Footer = () => {
                 alt="Quoter Logo"
                 loading="lazy"
                 decoding="async"
-                width={128}
-                height={128}
+                width={301}
+                height={262}
               />
             </Link>
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">

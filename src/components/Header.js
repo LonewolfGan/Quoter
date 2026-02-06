@@ -282,8 +282,8 @@ export const Header = () => {
                 alt="logo"
                 loading="eager"
                 decoding="async"
-                width={96}
-                height={96}
+                width={301}
+                height={262}
               />
             </Link>
 
@@ -322,8 +322,8 @@ export const Header = () => {
               alt="logo"
               loading="eager"
               decoding="async"
-              width={96}
-              height={96}
+              width={301}
+              height={262}
             />
           </Link>
           <div>
