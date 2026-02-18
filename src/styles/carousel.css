@@ -5,6 +5,8 @@
   height: 600px;
   overflow: hidden;
   perspective: 1200px;
+  touch-action: pan-y;
+  cursor: grab;
 }
 
 /* Background Canvas */

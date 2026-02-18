@@ -18,6 +18,7 @@ export function Carousel3D({ onCardClick }) {
     const stage = stageRef.current;
     const cardsRoot = cardsRef.current;
     const loader = loaderRef.current;
+    if (!stage || !cardsRoot) return undefined;
 
     const IMAGES = authors.map((author) => author.image);
     // Keep reference to authors array for accessing names
@@ -35,7 +36,7 @@ export function Carousel3D({ onCardClick }) {
     const FRICTION = 0.92; // Less friction for more fluid movement
     const WHEEL_SENS = 0.8; // Increased sensitivity
     const DRAG_SENS = 18; // Increased drag sensitivity
-    const AUTO_SPEED = prefersReducedMotion ? 0 : 150; // Auto-scroll speed
+    const AUTO_SPEED = 150; // Auto-scroll speed
 
     // Visual constants
     const MAX_ROTATION = 28; // Maximum card rotation in degrees
@@ -454,7 +455,6 @@ const loader = document.getElementById('loader');
 
     // Mouse wheel scrolling
     function onWheel(e) {
-      if (prefersReducedMotion) return;
       // Allow wheel immediately
       e.preventDefault();
 
@@ -512,7 +512,6 @@ const loader = document.getElementById('loader');
 
     // Pointer move - update scroll position
     function onPointerMove(e) {
-      if (prefersReducedMotion) return;
       if (!dragging) return;
 
       const now = performance.now();
@@ -587,6 +586,18 @@ const loader = document.getElementById('loader');
     }
     stage.addEventListener("pointerup", onPointerUp);
 
+    function onPointerCancel(e) {
+      if (!dragging) return;
+      dragging = false;
+      try {
+        stage.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignore capture-release errors when pointer is already released.
+      }
+      stage.classList.remove("dragging");
+    }
+    stage.addEventListener("pointercancel", onPointerCancel);
+
     // Debounced resize handler
     function onDebouncedResize() {
       clearTimeout(onResize._t);
@@ -599,7 +610,7 @@ const loader = document.getElementById('loader');
       if (document.hidden) {
         cancelCarousel();
       } else {
-        if (!prefersReducedMotion) startCarousel();
+        startCarousel();
       }
     }
     document.addEventListener("visibilitychange", onVisibilityChange);
@@ -626,7 +637,7 @@ const loader = document.getElementById('loader');
 
       // 3. START IMMEDIATELY
       if (loader) loader.classList.add("loader--hide");
-      if (!prefersReducedMotion) startCarousel();
+      startCarousel();
 
       // 4. Animate entry in parallel (non-blocking)
       const viewportWidth = window.innerWidth;
@@ -699,6 +710,7 @@ const loader = document.getElementById('loader');
       stage.removeEventListener("pointerdown", onPointerDown);
       stage.removeEventListener("pointermove", onPointerMove);
       stage.removeEventListener("pointerup", onPointerUp);
+      stage.removeEventListener("pointercancel", onPointerCancel);
       window.removeEventListener("resize", onDebouncedResize);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       carouselControlsRef.current = null;

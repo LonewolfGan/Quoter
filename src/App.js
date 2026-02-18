@@ -2,7 +2,7 @@ import { Header } from "./components/Header";
 import { AllRoutes } from "./routes/AllRoutes";
 import { CallToAction } from "./components/CallToAction";
 import { useScrollToTop } from "./hooks/useScrollToTop";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import ReactGA from "react-ga4";
 import CookieConsent from "react-cookie-consent";
@@ -12,34 +12,68 @@ export const App = () => {
   const location = useLocation();
   const gaInitializedRef = useRef(false);
   const GA_MEASUREMENT_ID = "G-Z4DXEWLV52";
+  const CONSENT_COOKIE_NAME = "quoterConsent";
+  const CONSENT_ACCEPTED = "accepted";
+  const CONSENT_REJECTED = "rejected";
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+  const isHttps = window.location.protocol === "https:";
 
-  const hasCookieConsent = () =>
-    document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("quoterConsent="));
+  const getCookieConsentValue = useCallback(
+    () =>
+      document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(`${CONSENT_COOKIE_NAME}=`))
+        ?.split("=")[1],
+    [CONSENT_COOKIE_NAME],
+  );
 
-  const initGA = () => {
-    if (gaInitializedRef.current) return;
+  const hasAcceptedCookies = useCallback(
+    () => {
+      const consent = getCookieConsentValue();
+      return consent === "true" || consent === CONSENT_ACCEPTED;
+    },
+    [getCookieConsentValue],
+  );
+
+  const clearAnalyticsCookies = useCallback(() => {
+    const measurementSuffix = GA_MEASUREMENT_ID.replace(/^G-/, "");
+    const gaCookies = ["_ga", "_gid", "_gat", `_ga_${measurementSuffix}`];
+    const securePart = isHttps ? " Secure;" : "";
+
+    gaCookies.forEach((name) => {
+      document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax;${securePart}`;
+    });
+  }, [GA_MEASUREMENT_ID, isHttps]);
+
+  const initGA = useCallback(() => {
+    if (gaInitializedRef.current || isLocalhost) return;
     ReactGA.initialize(GA_MEASUREMENT_ID);
     gaInitializedRef.current = true;
-  };
+  }, [isLocalhost]);
+
+  const trackPageView = useCallback(() => {
+    if (!gaInitializedRef.current) return;
+    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
+  }, []);
 
   useEffect(() => {
     // Check if user has accepted cookies before tracking
-    if (hasCookieConsent()) {
+    if (hasAcceptedCookies()) {
       initGA();
       // Send pageview to GA4 on route change only if consent given
-      ReactGA.send({ hitType: "pageview", page: window.location.pathname });
+      trackPageView();
     }
-  }, [location.pathname]);
+  }, [location.pathname, hasAcceptedCookies, initGA, trackPageView]);
 
   const handleCookieAccept = () => {
     initGA();
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
+    trackPageView();
   };
 
   const handleCookieDecline = () => {
-    // User declined cookies - don't track
+    clearAnalyticsCookies();
   };
 
   return (
@@ -52,7 +86,12 @@ export const App = () => {
         enableDeclineButton
         buttonText="Accepter"
         declineButtonText="Refuser"
-        cookieName="quoterConsent"
+        cookieName={CONSENT_COOKIE_NAME}
+        cookieValue={CONSENT_ACCEPTED}
+        declineCookieValue={CONSENT_REJECTED}
+        setDeclineCookie={true}
+        sameSite="Lax"
+        cookieSecurity={isHttps && !isLocalhost}
         expires={365}
         hideOnDecline={true}
         style={{

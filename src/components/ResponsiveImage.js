@@ -7,18 +7,14 @@ export const ResponsiveImage = ({
   alt,
   className = "",
   loading = "lazy",
+  fetchPriority,
   ...props
 }) => {
   return (
     <picture>
       {sources &&
         sources.map((s, i) => (
-          <source
-            key={i}
-            media={s.media}
-            srcSet={s.srcSet}
-            type={s.type}
-          />
+          <source key={i} media={s.media} srcSet={s.srcSet} type={s.type} />
         ))}
       {srcMobile && <source media="(max-width: 640px)" srcSet={srcMobile} />}
       <img
@@ -29,6 +25,7 @@ export const ResponsiveImage = ({
         className={className}
         loading={loading}
         {...props}
+        fetchpriority={fetchPriority}
       />
     </picture>
   );
