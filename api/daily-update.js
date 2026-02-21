@@ -1,11 +1,17 @@
 const { createClient } = require("@supabase/supabase-js");
 
-const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_KEY,
-);
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 module.exports = async (req, res) => {
+  if (!supabaseUrl || !supabaseKey) {
+    return res.status(500).json({
+      error: "Server misconfigured: missing Supabase server credentials",
+    });
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
   const isVercelCron = req.headers["user-agent"]?.includes("vercel-cron");
   const hasVercelOIDC = !!req.headers["x-vercel-oidc-token"];
   const isManualWithToken = req.query.token === process.env.CRON_SECRET;
@@ -54,8 +60,8 @@ module.exports = async (req, res) => {
       });
     }
 
-    // 3. Génère l'article avec Groq (shared generator)
-    const { generateArticle } = require("../src/utils/groqArticleGenerator");
+    // 3. Genere l'article avec Groq (server only)
+    const { generateArticle } = require("./lib/groqArticleGenerator");
     const article = await generateArticle(quote, today);
 
     // 4. Sauvegarde dans Supabase
@@ -79,5 +85,3 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-
-// generateArticle is now provided by src/utils/groqArticleGenerator.js

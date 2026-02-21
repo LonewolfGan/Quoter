@@ -28,7 +28,7 @@ export const QuoteSection = ({
     enabled: fetchEnabled,
   });
   const data = fetchEnabled ? fetchedData : externalData;
-  const isLoading = fetchEnabled ? fetchedLoading : externalLoading ?? false;
+  const isLoading = fetchEnabled ? fetchedLoading : (externalLoading ?? false);
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(
     window.innerWidth < 768 ? 4 : 8,

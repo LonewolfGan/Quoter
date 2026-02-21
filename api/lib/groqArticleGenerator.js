@@ -1,7 +1,7 @@
 async function generateArticle(quote, today) {
-  const apiKey = process.env.REACT_APP_GROQ_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    throw new Error("GROQ_API_KEY manquante");
+    throw new Error("Missing GROQ_API_KEY");
   }
 
   const response = await fetch(
@@ -17,22 +17,22 @@ async function generateArticle(quote, today) {
         messages: [
           {
             role: "user",
-            content: `Écris un article de blog complet et captivant en français sur cette citation :
+            content: `Ecris un article de blog complet et captivant en francais sur cette citation :
 "${quote.quote_text}" - ${quote.quote_author}
 
 L'article doit contenir :
 1. Un titre accrocheur et inspirant
 2. Une introduction engageante (2-3 phrases)
 3. Le contexte historique de la citation
-4. 4 points clés d'analyse ou d'application pratique
+4. 4 points cles d'analyse ou d'application pratique
 5. Un exercice pratique pour le lecteur
 6. Une conclusion inspirante
-7. Un excerpt original, sans phrases génériques ou toutes faites
+7. Un excerpt original, sans phrases generiques ou toutes faites
 
-Format ta réponse UNIQUEMENT en JSON strict (sans texte avant ou après) :
+Format ta reponse UNIQUEMENT en JSON strict (sans texte avant ou apres) :
 {
   "title": "Titre de l'article",
-  "excerpt": "Court résumé en 1-2 phrases (original, pas de phrase générique)",
+  "excerpt": "Court resume en 1-2 phrases (original, pas de phrase generique)",
   "intro": "Introduction",
   "context": "Contexte historique",
   "points": ["Point 1", "Point 2", "Point 3", "Point 4"],
@@ -63,7 +63,7 @@ Format ta réponse UNIQUEMENT en JSON strict (sans texte avant ou après) :
     excerpt: articleData.excerpt,
     quote_text: quote.quote_text,
     author: quote.quote_author,
-    category: quote.category || "Réflexion",
+    category: quote.category || "Reflexion",
     read_time: "6 min",
     published_date: today,
     content: {
@@ -76,5 +76,4 @@ Format ta réponse UNIQUEMENT en JSON strict (sans texte avant ou après) :
   };
 }
 
-// CommonJS export for server-side compatibility
 module.exports = { generateArticle };

@@ -7,7 +7,6 @@ import {
   useRef,
 } from "react";
 import { supabase } from "../utils/supabaseClient";
-import { generateArticle as groqGenerateArticle } from "../utils/groqArticleGenerator";
 
 const QuoteContext = createContext();
 
@@ -64,46 +63,6 @@ export const QuoteProvider = ({ children }) => {
         "Cette citation continue d'inspirer et de guider des générations.",
     },
   });
-
-  /* =====================================================
-     GENERATE ARTICLE (GROQ) - wrapper around shared generator
-  ===================================================== */
-  const generateArticle = useCallback(async (quote, today) => {
-    try {
-      const generated = await groqGenerateArticle(quote, today);
-
-      const { data: savedArticle, error } = await supabase
-        .from("articles")
-        .upsert([generated], { onConflict: "id" })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      localStorage.setItem(
-        "dailyArticle",
-        JSON.stringify({ date: today, article: savedArticle }),
-      );
-
-      return savedArticle;
-    } catch (err) {
-      const fallback = createFallbackArticle(quote, today);
-
-      try {
-        const { data: savedFallback, error: fallbackError } = await supabase
-          .from("articles")
-          .upsert([fallback], { onConflict: "id" })
-          .select()
-          .single();
-
-        if (!fallbackError) return savedFallback;
-      } catch (fallbackErr) {
-        // Ignore fallback errors
-      }
-
-      return fallback;
-    }
-  }, []);
 
   /* =====================================================
      LOAD DAILY QUOTE
@@ -174,7 +133,7 @@ export const QuoteProvider = ({ children }) => {
   }, []);
 
   /* =====================================================
-     LOAD OR GENERATE ARTICLE
+     LOAD OR FALLBACK ARTICLE
   ===================================================== */
   const loadOrGenerateArticle = useCallback(
     async (today, quote) => {
@@ -212,21 +171,24 @@ export const QuoteProvider = ({ children }) => {
         }
 
         setIsGenerating(true);
-        try {
-          const article = await generateArticle(quote, today);
-          setDailyArticle(article);
-        } catch (genError) {
-          const fallbackArticle = createFallbackArticle(quote, today);
-          setDailyArticle(fallbackArticle);
-        } finally {
-          setIsGenerating(false);
-        }
-      } catch (err) {
         const fallbackArticle = createFallbackArticle(quote, today);
         setDailyArticle(fallbackArticle);
+        localStorage.setItem(
+          "dailyArticle",
+          JSON.stringify({ date: today, article: fallbackArticle }),
+        );
+        setIsGenerating(false);
+      } catch (err) {
+        setIsGenerating(false);
+        const fallbackArticle = createFallbackArticle(quote, today);
+        setDailyArticle(fallbackArticle);
+        localStorage.setItem(
+          "dailyArticle",
+          JSON.stringify({ date: today, article: fallbackArticle }),
+        );
       }
     },
-    [generateArticle],
+    [],
   );
 
   /* =====================================================
