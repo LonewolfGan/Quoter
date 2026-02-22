@@ -56,6 +56,8 @@ export const App = () => {
       gtagOptions: {
         cookie_domain: window.location.hostname,
         cookie_flags: isHttps ? "SameSite=Lax;Secure" : "SameSite=Lax",
+        cookie_update: false,
+        cookie_expires: 63072000,
         send_page_view: false,
       },
     });
