@@ -49,9 +49,18 @@ export const App = () => {
 
   const initGA = useCallback(() => {
     if (gaInitializedRef.current || isLocalhost) return;
-    ReactGA.initialize(GA_MEASUREMENT_ID);
+    ReactGA.initialize(GA_MEASUREMENT_ID, {
+      gaOptions: {
+        cookie_domain: window.location.hostname,
+      },
+      gtagOptions: {
+        cookie_domain: window.location.hostname,
+        cookie_flags: isHttps ? "SameSite=Lax;Secure" : "SameSite=Lax",
+        send_page_view: false,
+      },
+    });
     gaInitializedRef.current = true;
-  }, [isLocalhost]);
+  }, [isHttps, isLocalhost]);
 
   const trackPageView = useCallback(() => {
     if (!gaInitializedRef.current) return;
