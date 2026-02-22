@@ -21,7 +21,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: https://res.cloudinary.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com; connect-src 'self' https://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com; manifest-src 'self'; frame-src 'none'; upgrade-insecure-requests"
+          "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: https://res.cloudinary.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://static.cloudflareinsights.com https://www.googletagmanager.com; connect-src 'self' https://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com https://res.cloudinary.com https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net https://cloudflareinsights.com https://static.cloudflareinsights.com; manifest-src 'self'; frame-src 'none'; upgrade-insecure-requests"
         },
         {
           "key": "X-Content-Type-Options",
