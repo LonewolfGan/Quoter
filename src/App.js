@@ -2,7 +2,7 @@ import { Header } from "./components/Header";
 import { AllRoutes } from "./routes/AllRoutes";
 import { CallToAction } from "./components/CallToAction";
 import { useScrollToTop } from "./hooks/useScrollToTop";
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
 import ReactGA from "react-ga4";
 import CookieConsent from "react-cookie-consent";
@@ -20,6 +20,18 @@ export const App = () => {
     window.location.hostname === "127.0.0.1";
   const isHttps = window.location.protocol === "https:";
 
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const getCookieConsentValue = useCallback(
     () =>
       document.cookie
@@ -29,13 +41,10 @@ export const App = () => {
     [CONSENT_COOKIE_NAME],
   );
 
-  const hasAcceptedCookies = useCallback(
-    () => {
-      const consent = getCookieConsentValue();
-      return consent === "true" || consent === CONSENT_ACCEPTED;
-    },
-    [getCookieConsentValue],
-  );
+  const hasAcceptedCookies = useCallback(() => {
+    const consent = getCookieConsentValue();
+    return consent === "true" || consent === CONSENT_ACCEPTED;
+  }, [getCookieConsentValue]);
 
   const clearAnalyticsCookies = useCallback(() => {
     const measurementSuffix = GA_MEASUREMENT_ID.replace(/^G-/, "");
@@ -110,15 +119,18 @@ export const App = () => {
           backdropFilter: "blur(10px)",
           border: "1px solid rgba(0, 0, 0, 0.05)",
           padding: "24px",
-          width: "350px",
-          bottom: "24px",
-          right: "24px",
-          left: "auto",
+          width: isMobile ? "calc(100% - 32px)" : "350px",
+          maxWidth: "350px",
+          bottom: isMobile ? "16px" : "24px",
+          right: isMobile ? "auto" : "24px",
+          left: isMobile ? "50%" : "auto",
+          transform: isMobile ? "translateX(-50%)" : "none",
           borderRadius: "16px",
           flexDirection: "column",
           alignItems: "stretch",
           boxShadow: "0 10px 40px -10px rgba(0, 0, 0, 0.15)",
           zIndex: "1000",
+          display: "flex",
         }}
         buttonStyle={{
           background: "#000000",

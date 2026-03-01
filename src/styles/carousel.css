@@ -105,9 +105,8 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Hide navigation buttons by default (desktop) */
-.carousel-nav--mobile-only {
-  display: none;
+.carousel-nav {
+  display: flex !important;
 }
 
 .carousel-nav:hover {
@@ -134,21 +133,8 @@
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  /* Show navigation buttons on mobile */
-  .carousel-nav--mobile-only {
-    display: flex;
-  }
-
+  /* Hide navigation buttons on mobile */
   .carousel-nav {
-    width: 44px;
-    height: 44px;
-  }
-
-  .carousel-nav--prev {
-    left: 10px;
-  }
-
-  .carousel-nav--next {
-    right: 10px;
+    display: none !important;
   }
 }

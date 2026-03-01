@@ -1,15 +1,17 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { QuoteSection } from "../components/QuoteSection";
 import { useTitle } from "../hooks";
+import { getOriginalCategory } from "../utils/categoryHelper";
 
 export const CategoryQuotes = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const title = `Quoter - ${slug}`;
+
+  // On retrouve le nom EXACT avec accents pour la DB (ex: amitie -> Amitié)
+  const dbCategory = getOriginalCategory(slug);
+
+  const title = `Quoter - ${dbCategory}`;
   useTitle({ title });
-  
-  // Décoder le slug pour l'affichage
-  const displayName = decodeURIComponent(slug).replace(/-/g, ' ');
 
   const handleBack = () => {
     navigate(-1);
@@ -25,10 +27,10 @@ export const CategoryQuotes = () => {
       </button>
 
       <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center capitalize">
-        {displayName}
+        {dbCategory}
       </h1>
 
-      <QuoteSection category={slug} />
+      <QuoteSection category={dbCategory} />
     </main>
   );
 };

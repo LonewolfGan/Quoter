@@ -17,33 +17,50 @@ export const useGet = ({ query, name, category, enabled = true }) => {
       const selectFields = "id, quote_text, quote_author, category";
       let supabaseQuery = supabase.from("quotes").select(selectFields);
 
-      // Filtre par auteur (partial match) - Gestion des accents
+      // Construction des filtres
       if (name) {
         const normalizedName = normalize(name);
-        supabaseQuery = supabaseQuery.ilike(
-          "quote_author",
-          `%${normalizedName}%`
-        );
+        if (normalizedName !== name) {
+          // Si on a des accents, on cherche les deux
+          supabaseQuery = supabaseQuery.or(
+            `quote_author.ilike.%${name}%,quote_author.ilike.%${normalizedName}%`,
+          );
+        } else {
+          supabaseQuery = supabaseQuery.ilike("quote_author", `%${name}%`);
+        }
       }
 
-      // Filtre par catégorie (partial match) - Gestion des accents
       if (category) {
         const normalizedCategory = normalize(category);
-        supabaseQuery = supabaseQuery.ilike(
-          "category",
-          `%${normalizedCategory}%`
-        );
+        if (normalizedCategory !== category) {
+          // Si on a des accents, on cherche les deux versions (ex: "Amitié" et "Amitie")
+          supabaseQuery = supabaseQuery.or(
+            `category.ilike.%${category}%,category.ilike.%${normalizedCategory}%`,
+          );
+        } else {
+          supabaseQuery = supabaseQuery.ilike("category", `%${category}%`);
+        }
       }
 
-      // Recherche textuelle
       if (query && query.trim().length > 0) {
         const searchTerm = query.trim();
         const normalizedSearch = normalize(searchTerm);
 
-        // Construction de la requête OR avec le terme normalisé (plus robuste selon le retour utilisateur)
-        supabaseQuery = supabaseQuery.or(
-          `quote_text.ilike.%${normalizedSearch}%,quote_author.ilike.%${normalizedSearch}%,category.ilike.%${normalizedSearch}%`
-        );
+        if (normalizedSearch !== searchTerm) {
+          // Recherche très large incluant les versions accentuées et non-accentuées
+          const terms = [searchTerm, normalizedSearch];
+          const filterStr = terms
+            .map(
+              (term) =>
+                `quote_text.ilike.%${term}%,quote_author.ilike.%${term}%,category.ilike.%${term}%`,
+            )
+            .join(",");
+          supabaseQuery = supabaseQuery.or(filterStr);
+        } else {
+          supabaseQuery = supabaseQuery.or(
+            `quote_text.ilike.%${searchTerm}%,quote_author.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`,
+          );
+        }
       }
       const { data: results, error: queryError } = await supabaseQuery;
 

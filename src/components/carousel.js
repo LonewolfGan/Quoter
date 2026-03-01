@@ -33,10 +33,10 @@ export function Carousel3D({ onCardClick }) {
     // ============================================================================
 
     // Physics constants
-    const FRICTION = 0.92; // Less friction for more fluid movement
-    const WHEEL_SENS = 0.8; // Increased sensitivity
-    const DRAG_SENS = 18; // Increased drag sensitivity
-    const AUTO_SPEED = 150; // Auto-scroll speed
+    const FRICTION = isMobile ? 0.9 : 0.92;
+    const WHEEL_SENS = isMobile ? 0.3 : 0.8;
+    const DRAG_SENS = isMobile ? 0.4 : 0.8;
+    const AUTO_SPEED = isMobile ? 120 : 150;
 
     // Visual constants
     const MAX_ROTATION = 28; // Maximum card rotation in degrees
@@ -523,7 +523,7 @@ const loader = document.getElementById('loader');
         hasMoved = true;
       }
 
-      SCROLL_X = mod(SCROLL_X - dx * DRAG_SENS, TRACK);
+      SCROLL_X = mod(SCROLL_X - dx * DRAG_SENS * 15, TRACK);
       lastDelta = dx / dt; // Track velocity for momentum
       lastX = e.clientX;
       lastT = now;
@@ -579,7 +579,7 @@ const loader = document.getElementById('loader');
           }
         }
       } else if (!prefersReducedMotion) {
-        vX = -lastDelta * DRAG_SENS; // Apply final velocity
+        vX = -lastDelta * DRAG_SENS * 15; // Apply final velocity
       }
 
       stage.classList.remove("dragging");
@@ -747,7 +747,7 @@ const loader = document.getElementById('loader');
       <div id="cards" ref={cardsRef}></div>
 
       <button
-        className="carousel-nav carousel-nav--prev carousel-nav--mobile-only"
+        className="carousel-nav carousel-nav--prev"
         onClick={handlePrev}
         onMouseDown={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
@@ -766,7 +766,7 @@ const loader = document.getElementById('loader');
         </svg>
       </button>
       <button
-        className="carousel-nav carousel-nav--next carousel-nav--mobile-only"
+        className="carousel-nav carousel-nav--next"
         onClick={handleNext}
         onMouseDown={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}

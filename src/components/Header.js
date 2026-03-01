@@ -1,23 +1,12 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect, useMemo } from "react";
+// No useTitle here
+import { CATEGORIES_LIST, slugify } from "../utils/categoryHelper";
 import logo from "../assets/logo/1.webp";
 import { ResponsiveImage } from "./ResponsiveImage";
 
 // Les images sont maintenant dans le dossier public/bg_images
 const imageIds = Array.from({ length: 10 }, (_, i) => 61 + i);
-
-const categories = [
-  "Amour",
-  "Amitié",
-  "Bonheur",
-  "Vie",
-  "Motivation",
-  "Réussite",
-  "Philosophie",
-  "Sagesse",
-  "Liberté",
-  "Espoir",
-].sort();
 
 export const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -37,6 +26,8 @@ export const Header = () => {
   );
   const isHiDpi =
     typeof window !== "undefined" ? window.devicePixelRatio > 1.5 : false;
+
+  const categories = CATEGORIES_LIST;
 
   const images = useMemo(() => {
     return imageIds.map((id) => {
@@ -202,8 +193,8 @@ export const Header = () => {
       <div className="flex flex-col items-center justify-between h-full py-8 text-lg sm:text-xl md:text-2xl lg:text-3xl">
         {/* NAV EN HAUT */}
         <div className="hidden md:block">
-          <nav className="relative z-10 bg-white/40 backdrop-blur-2xl md:flex hidden w-fit flex-row justify-center items-center gap-10 border-2 m-2 py-2 px-20 border-black rounded-full shadow-lg">
-            <div className="flex gap-10">
+          <nav className="relative z-10 bg-white/40 backdrop-blur-2xl md:flex hidden w-fit flex-row justify-center items-center gap-4 lg:gap-10 border-2 m-2 py-2 px-6 lg:px-20 border-black rounded-full shadow-lg">
+            <div className="flex gap-4 lg:gap-10">
               <NavLink
                 to="/"
                 className={`rounded-full py-2 px-4 border-2 transition
@@ -263,7 +254,7 @@ export const Header = () => {
                     {categories.map((cat) => (
                       <Link
                         key={cat}
-                        to={`/categories/${cat}`}
+                        to={`/categories/${slugify(cat)}`}
                         className="block px-4 py-2 hover:bg-gray-100 rounded-lg text-black text-center transition-colors"
                         onClick={() => setDrop(false)}
                       >
@@ -287,7 +278,7 @@ export const Header = () => {
               />
             </Link>
 
-            <div className="flex gap-10">
+            <div className="flex gap-4 lg:gap-10">
               <NavLink
                 to="/authors"
                 className={({ isActive }) =>
@@ -432,7 +423,7 @@ export const Header = () => {
             <input
               className="p-2 bg-transparent border-none w-3/4 outline-none placeholder-gray-500"
               type="text"
-              placeholder="Rechercher......"
+              placeholder="Tapez votre recherche..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(event) => {

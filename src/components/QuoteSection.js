@@ -102,11 +102,20 @@ export const QuoteSection = ({
           aria-label="Page précédente"
           onClick={() => setPage((p) => Math.max(p - 1, 1))}
           disabled={page === 1}
-          className="px-5 py-2 rounded-full border border-black
-               disabled:opacity-40 disabled:cursor-not-allowed
-               hover:bg-black hover:text-white transition"
+          className="w-12 h-12 flex items-center justify-center rounded-full border-2 border-black
+               disabled:opacity-20 disabled:cursor-not-allowed
+               hover:bg-black hover:text-white hover:scale-110 active:scale-90 transition-all duration-300 shadow-md"
         >
-          ←
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
         </button>
         <span className="text-gray-600 font-medium">
           Page {page} / {totalItems}
@@ -116,11 +125,20 @@ export const QuoteSection = ({
           aria-label="Page suivante"
           onClick={() => setPage((p) => Math.min(p + 1, totalItems))}
           disabled={page >= totalItems}
-          className="px-5 py-2 rounded-full border border-black
-               disabled:opacity-40 disabled:cursor-not-allowed
-               hover:bg-black hover:text-white transition"
+          className="w-12 h-12 flex items-center justify-center rounded-full border-2 border-black
+               disabled:opacity-20 disabled:cursor-not-allowed
+               hover:bg-black hover:text-white hover:scale-110 active:scale-90 transition-all duration-300 shadow-md"
         >
-          →
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
         </button>
       </div>
       <div className=" flex flex-wrap justify-center gap-5 m-2">
@@ -128,8 +146,7 @@ export const QuoteSection = ({
           paginatedQuotes.map((quote, index) => (
             <div
               key={`${page}-${quote.id}-${index}`}
-              className="border border-black rounded-xl flex items-center justify-center overflow-hidden bg-white"
-              style={{ width: thumbSize, height: thumbSize }}
+              className="border border-black rounded-xl flex items-center justify-center overflow-hidden bg-white w-[45%] md:w-[350px] aspect-square"
             >
               <ResponsiveImage
                 src={getSquareUrl(quote.id, thumbSize)}
@@ -170,11 +187,10 @@ export const QuoteSection = ({
           <button
             aria-disabled={selectedQuoteIndex === 0}
             aria-label="Citation précédente"
-            key={selectedQuoteIndex}
-            className={`absolute left-2 md:left-8 text-white z-[60] p-2 rounded-full transition-all
-    hover:text-gray-300 hover:bg-white/10
-    aria-disabled:opacity-30
-    aria-disabled:pointer-events-none
+            key={`prev-${selectedQuoteIndex}`}
+            className={`absolute left-2 md:left-8 bg-black/40 backdrop-blur-md text-white z-[60] p-1 md:p-4 rounded-full border border-white/20 shadow-2xl transition-all duration-300
+    hover:bg-black/80 hover:scale-110 active:scale-90
+    disabled:opacity-20 disabled:cursor-not-allowed
     ${selectedQuoteIndex === 0 ? "" : "pulse-animation"}
   `}
             onClick={(e) => {
@@ -203,11 +219,10 @@ export const QuoteSection = ({
           <button
             aria-disabled={selectedQuoteIndex === allUniqueQuotes.length - 1}
             aria-label="Citation suivante"
-            key={selectedQuoteIndex}
-            className={`absolute right-2 md:right-8 text-white z-[60] p-2 rounded-full transition-all
-    hover:text-gray-300 hover:bg-white/10
-    aria-disabled:opacity-30
-    aria-disabled:pointer-events-none
+            key={`next-${selectedQuoteIndex}`}
+            className={`absolute right-2 md:right-8 bg-black/40 backdrop-blur-md text-white z-[60] p-1 md:p-4 rounded-full border border-white/20 shadow-2xl transition-all duration-300
+    hover:bg-black/80 hover:scale-110 active:scale-90
+    disabled:opacity-20 disabled:cursor-not-allowed
     ${
       selectedQuoteIndex === allUniqueQuotes.length - 1 ? "" : "pulse-animation"
     }
@@ -239,12 +254,21 @@ export const QuoteSection = ({
 
           {/* CLOSE BUTTON */}
           <button
-            className="absolute top-4 right-4 text-white text-5xl font-light hover:text-zinc-300 transition-colors z-[60] border border-white rounded-2xl px-2"
+            className="absolute top-4 right-4 bg-white/10 backdrop-blur-md text-white w-12 h-12 flex items-center justify-center rounded-full border border-white/30 hover:bg-white/20 hover:scale-110 active:scale-90 transition-all duration-300 z-[60] shadow-xl"
             onClick={() => setSelectedQuoteIndex(null)}
             aria-label="Close"
             type="button"
           >
-            &times;
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
           </button>
           <div
             className="relative w-full max-w-3xl max-h-[90vh] flex flex-col gap-4 md:gap-6 backdrop-blur-md rounded-2xl p-6 md:p-8 shadow-2xl"
