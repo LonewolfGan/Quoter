@@ -58,16 +58,10 @@ export const Header = () => {
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [images]);
+  }, []);
 
   // Effet pour la rotation des images
   useEffect(() => {
-    const prefersReducedMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) return;
-
     let timeout1, timeout2;
     let isMounted = true;
     let intervalId;
