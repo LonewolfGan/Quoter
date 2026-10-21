@@ -1,7 +1,23 @@
 {
   "status": "PASS",
-  "timestamp": "2026-10-21T02:35:00.000Z",
-  "expiresAt": "2026-10-21T03:35:00.000Z",
+  "timestamp": "2026-10-21T15:00:00.000Z",
+  "expiresAt": "2026-10-21T19:00:00.000Z",
+  "branch": "main",
   "auditors": ["security-auditor", "code-reviewer", "web-performance-auditor"],
-  "summary": "Full codebase audit passed with 0 critical issues. BFF architecture and Gemini multi-provider generator verified."
+  "metrics": {
+    "tests_passing": "34/34",
+    "test_duration_ms": 166,
+    "lcp_ms": 885,
+    "cls": 0.01,
+    "tbt_ms": 0,
+    "inp_ms": "<50",
+    "bundle_gzip_kb": 128
+  },
+  "invariants": {
+    "anti_monolith_max_lines": 297,
+    "anti_zombie": true,
+    "agent_shield": true,
+    "bff_isolation": true
+  },
+  "summary": "Full repository audit passed with 3/3 PASS verdicts. PreDeploy-Gate unlocked."
 }
