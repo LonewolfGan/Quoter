@@ -2,6 +2,20 @@ const crypto = require("node:crypto");
 const { createClient } = require("@supabase/supabase-js");
 
 module.exports = async (req, res) => {
+  if (req.method && req.method !== "GET" && req.method !== "POST") {
+    if (typeof res.setHeader === "function") {
+      res.setHeader("Allow", "GET, POST");
+    }
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  if (typeof res.setHeader === "function") {
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, private"
+    );
+  }
+
   const authHeader = req.headers?.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Unauthorized" });

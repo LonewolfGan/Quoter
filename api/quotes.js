@@ -8,7 +8,11 @@ function normalizeAccents(str) {
 
 function sanitizePostgrest(str) {
   if (typeof str !== "string") return "";
-  return str.replace(/[,()"\\]/g, " ").replace(/\s+/g, " ").trim();
+  return str
+    .replace(/[,()"\\]/g, " ")
+    .replace(/[%_]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 module.exports = async function handler(req, res) {
@@ -19,7 +23,7 @@ module.exports = async function handler(req, res) {
 
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     return res.status(500).json({ error: "Internal Server Error" });
