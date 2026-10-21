@@ -1,6 +1,7 @@
 import { Header } from "./components/Header";
 import { AllRoutes } from "./routes/AllRoutes";
 import { CallToAction } from "./components/CallToAction";
+import { Footer } from "./components/Footer";
 import { useScrollToTop } from "./hooks/useScrollToTop";
 import { useEffect, useRef, useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -101,6 +102,7 @@ export const App = () => {
       <Header />
       <AllRoutes />
       <CallToAction />
+      <Footer />
       <CookieConsent
         location="none"
         enableDeclineButton

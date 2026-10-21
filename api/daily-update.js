@@ -1,9 +1,34 @@
+const crypto = require("node:crypto");
 const { createClient } = require("@supabase/supabase-js");
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
 module.exports = async (req, res) => {
+  const authHeader = req.headers?.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
+    return res.status(500).json({
+      error: "Server misconfigured: missing CRON_SECRET",
+    });
+  }
+
+  const token = authHeader.slice(7).trim();
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const hashToken = crypto.createHash("sha256").update(token).digest();
+  const hashSecret = crypto.createHash("sha256").update(cronSecret).digest();
+
+  if (!crypto.timingSafeEqual(hashToken, hashSecret)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
   if (!supabaseUrl || !supabaseKey) {
     return res.status(500).json({
       error: "Server misconfigured: missing Supabase server credentials",
@@ -11,17 +36,6 @@ module.exports = async (req, res) => {
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
-
-  const isVercelCron = req.headers["user-agent"]?.includes("vercel-cron");
-  const hasVercelOIDC = !!req.headers["x-vercel-oidc-token"];
-  const isManualWithToken = req.query.token === process.env.CRON_SECRET;
-
-  if (!isVercelCron && !hasVercelOIDC && !isManualWithToken) {
-    return res.status(401).json({
-      error: "Unauthorized",
-      hint: "Use Vercel Cron or provide valid token",
-    });
-  }
 
   try {
     const today = new Date().toISOString().split("T")[0];
@@ -60,7 +74,7 @@ module.exports = async (req, res) => {
       });
     }
 
-    // 3. Genere l'article avec Groq (server only)
+    // 3. Genere l'article avec le générateur serveur
     const { generateArticle } = require("./lib/groqArticleGenerator");
     const article = await generateArticle(quote, today);
 
@@ -78,10 +92,10 @@ module.exports = async (req, res) => {
       date: today,
       quote: quote.quote_text,
       article: savedArticle.title,
-      triggered_by: isVercelCron ? "Vercel Cron" : "Manual trigger",
+      triggered_by: "Cron trigger",
     });
   } catch (error) {
-    console.error("Erreur:", error);
-    return res.status(500).json({ error: error.message });
+    console.error("Cron execution error:", error.message);
+    return res.status(500).json({ error: "Internal generation error" });
   }
 };

@@ -23,7 +23,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "node --test \"api/*.test.js\" \"api/**/*.test.js\" \"tests/*.test.js\"",
+    "test:react": "react-scripts test --passWithNoTests",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

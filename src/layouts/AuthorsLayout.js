@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Carousel3D } from "../components/index";
 import { useNavigate } from "react-router-dom";
@@ -9,33 +10,36 @@ export const AuthorsLayout = () => {
   const title = "Quoter - Authors";
   useTitle({ title });
   // Affiche le carousel seulement sur la page principale /authors
-  const showCarousel = location.pathname === "/authors";
+  const showCarousel = location.pathname.replace(/\/$/, "") === "/authors";
 
-  const handleCardClick = (
-    index,
-    imageUrl,
-    name,
-    bio,
-    birth,
-    death,
-    nationality,
-    domain,
-    knownFor
-  ) => {
-    navigate(`/authors/${name}`, {
-      state: {
-        imageIndex: index,
-        imageUrl: imageUrl,
-        name: name,
-        bio: bio,
-        birth: birth,
-        death: death,
-        nationality: nationality,
-        domain: domain,
-        knownFor: knownFor,
-      },
-    });
-  };
+  const handleCardClick = useCallback(
+    (
+      index,
+      imageUrl,
+      name,
+      bio,
+      birth,
+      death,
+      nationality,
+      domain,
+      knownFor
+    ) => {
+      navigate(`/authors/${name}`, {
+        state: {
+          imageIndex: index,
+          imageUrl: imageUrl,
+          name: name,
+          bio: bio,
+          birth: birth,
+          death: death,
+          nationality: nationality,
+          domain: domain,
+          knownFor: knownFor,
+        },
+      });
+    },
+    [navigate]
+  );
 
   return (
     <main>

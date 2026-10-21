@@ -455,9 +455,6 @@ const loader = document.getElementById('loader');
 
     // Mouse wheel scrolling
     function onWheel(e) {
-      // Allow wheel immediately
-      e.preventDefault();
-
       const delta =
         Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
 
@@ -465,7 +462,7 @@ const loader = document.getElementById('loader');
       const wheelFactor = Math.min(Math.abs(delta), 100) * Math.sign(delta);
       vX += wheelFactor * WHEEL_SENS * 10;
     }
-    stage.addEventListener("wheel", onWheel, { passive: false });
+    stage.addEventListener("wheel", onWheel, { passive: true });
 
     // Prevent default drag behavior
     function onDragStart(e) {

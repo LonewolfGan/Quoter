@@ -1,19 +1,38 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-} from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "../utils/supabaseClient";
 
 const QuoteContext = createContext();
 
+const getInitialDailyQuote = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    const cached = localStorage.getItem("dailyQuote");
+    if (cached) {
+      const { date, quote } = JSON.parse(cached);
+      if (date === today) return quote;
+    }
+  } catch (_) {}
+  return null;
+};
+
+const getInitialDailyArticle = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    const cached = localStorage.getItem("dailyArticle");
+    if (cached) {
+      const { date, article } = JSON.parse(cached);
+      if (date === today) return article;
+    }
+  } catch (_) {}
+  return null;
+};
+
 export const QuoteProvider = ({ children }) => {
-  const [dailyQuote, setDailyQuote] = useState(null);
-  const [dailyArticle, setDailyArticle] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [dailyQuote, setDailyQuote] = useState(getInitialDailyQuote);
+  const [dailyArticle, setDailyArticle] = useState(getInitialDailyArticle);
+  const [isLoading, setIsLoading] = useState(() => !getInitialDailyQuote());
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(null);
   const [currentDate, setCurrentDate] = useState(
@@ -80,6 +99,8 @@ export const QuoteProvider = ({ children }) => {
         localStorage.removeItem("dailyQuote");
       }
     }
+
+    if (!supabase) return;
 
     try {
       const { count, error: countError } = await supabase
@@ -151,6 +172,8 @@ export const QuoteProvider = ({ children }) => {
           localStorage.removeItem("dailyArticle");
         }
       }
+
+      if (!supabase) return;
 
       try {
         const { data, error } = await supabase
@@ -225,12 +248,10 @@ export const QuoteProvider = ({ children }) => {
     const checkForNewDay = () => {
       const today = new Date().toISOString().split("T")[0];
       if (today !== currentDate && isMounted) {
-        setCurrentDate(today);
-        setIsLoading(true);
         localStorage.removeItem("dailyQuote");
         localStorage.removeItem("dailyArticle");
         isLoadingRef.current = false;
-        loadData();
+        setCurrentDate(today);
       }
     };
 
@@ -243,17 +264,20 @@ export const QuoteProvider = ({ children }) => {
     };
   }, [currentDate, loadDailyQuote, loadOrGenerateArticle]);
 
+  const value = useMemo(
+    () => ({
+      dailyQuote,
+      dailyArticle,
+      isLoading,
+      isGenerating,
+      error,
+      currentDate,
+    }),
+    [dailyQuote, dailyArticle, isLoading, isGenerating, error, currentDate],
+  );
+
   return (
-    <QuoteContext.Provider
-      value={{
-        dailyQuote,
-        dailyArticle,
-        isLoading,
-        isGenerating,
-        error,
-        currentDate,
-      }}
-    >
+    <QuoteContext.Provider value={value}>
       {children}
     </QuoteContext.Provider>
   );
