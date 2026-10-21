@@ -67,7 +67,9 @@ export const useGet = ({
         if (err.name === "AbortError") {
           return;
         }
-        console.error("Erreur useGet:", err);
+        if (process.env.NODE_ENV === "development") {
+          console.error("Erreur useGet:", err);
+        }
         setError(err.message || "Failed to fetch quotes");
         setData([]);
         setCount(0);

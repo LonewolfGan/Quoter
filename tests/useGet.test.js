@@ -2,165 +2,12 @@ const { describe, it, beforeEach, afterEach } = require("node:test");
 const assert = require("node:assert");
 const fs = require("node:fs");
 const path = require("node:path");
-
-// 1. Hook de chargement pour transpiler la syntaxe ESM (import/export) dans Node
-const originalJsHandler = require.extensions[".js"];
-require.extensions[".js"] = function (module, filename) {
-  if (
-    filename.includes(path.join("src", "hooks", "useGet.js")) ||
-    filename.includes(path.join("src", "utils", "supabaseClient.js"))
-  ) {
-    let content = fs.readFileSync(filename, "utf8");
-    content = content
-      .replace(
-        /import\s+\{\s*([^}]+)\s*\}\s+from\s+["']([^"']+)["'];?/g,
-        'const { $1 } = require("$2");'
-      )
-      .replace(
-        /import\s+([a-zA-Z0-9_$]+)\s+from\s+["']([^"']+)["'];?/g,
-        'const $1 = require("$2");'
-      )
-      .replace(
-        /export\s+const\s+([a-zA-Z0-9_$]+)\s*=/g,
-        "const $1 = exports.$1 ="
-      )
-      .replace(/export\s+default\s+([a-zA-Z0-9_$]+);?/g, "module.exports = $1;");
-    module._compile(content, filename);
-  } else {
-    originalJsHandler(module, filename);
-  }
-};
-
-// 2. Harness React Hook pour environnement Node.js
-let currentHarness = null;
-
-const mockReact = {
-  useState(initial) {
-    if (!currentHarness) {
-      throw new Error("Hooks must be called inside the harness");
-    }
-    return currentHarness.useState(initial);
-  },
-  useEffect(effect, deps) {
-    if (!currentHarness) {
-      throw new Error("Hooks must be called inside the harness");
-    }
-    return currentHarness.useEffect(effect, deps);
-  },
-  useCallback(fn, deps) {
-    if (!currentHarness) {
-      throw new Error("Hooks must be called inside the harness");
-    }
-    return currentHarness.useCallback(fn, deps);
-  },
-};
-
-require.cache[require.resolve("react")] = {
-  id: require.resolve("react"),
-  filename: require.resolve("react"),
-  loaded: true,
-  exports: mockReact,
-};
-
-class HookHarness {
-  constructor(hookFn) {
-    this.hookFn = hookFn;
-    this.states = [];
-    this.stateIndex = 0;
-    this.effects = [];
-    this.effectIndex = 0;
-    this.callbacks = [];
-    this.callbackIndex = 0;
-    this.cleanups = [];
-    this.result = undefined;
-    this.props = undefined;
-  }
-
-  useState(initial) {
-    const idx = this.stateIndex++;
-    if (idx >= this.states.length) {
-      const val = typeof initial === "function" ? initial() : initial;
-      this.states.push(val);
-    }
-    const setter = (nextVal) => {
-      this.states[idx] =
-        typeof nextVal === "function" ? nextVal(this.states[idx]) : nextVal;
-    };
-    return [this.states[idx], setter];
-  }
-
-  useEffect(effect, deps) {
-    const idx = this.effectIndex++;
-    const prev = this.effects[idx];
-    const hasChanged =
-      !prev || !deps || deps.some((d, i) => d !== prev.deps[i]);
-    if (hasChanged) {
-      this.effects[idx] = { effect, deps, hasRun: false };
-    }
-  }
-
-  useCallback(fn, deps) {
-    const idx = this.callbackIndex++;
-    const prev = this.callbacks[idx];
-    const hasChanged =
-      !prev || !deps || deps.some((d, i) => d !== prev.deps[i]);
-    if (hasChanged) {
-      this.callbacks[idx] = { fn, deps };
-      return fn;
-    }
-    return prev.fn;
-  }
-
-  render(props) {
-    this.props = props;
-    this.stateIndex = 0;
-    this.effectIndex = 0;
-    this.callbackIndex = 0;
-    currentHarness = this;
-    try {
-      this.result = this.hookFn(this.props);
-    } finally {
-      currentHarness = null;
-    }
-
-    for (let i = 0; i < this.effects.length; i++) {
-      const eff = this.effects[i];
-      if (!eff.hasRun) {
-        if (typeof this.cleanups[i] === "function") {
-          try {
-            this.cleanups[i]();
-          } catch (_) {}
-        }
-        eff.hasRun = true;
-        const cleanup = eff.effect();
-        if (typeof cleanup === "function") {
-          this.cleanups[i] = cleanup;
-        }
-      }
-    }
-    return this.result;
-  }
-
-  unmount() {
-    for (const cleanup of this.cleanups) {
-      if (typeof cleanup === "function") {
-        try {
-          cleanup();
-        } catch (_) {}
-      }
-    }
-    this.cleanups = [];
-  }
-}
-
-function flushPromises() {
-  return new Promise((resolve) => setTimeout(resolve, 10));
-}
+const { HookHarness, flushPromises } = require("./helpers/hookHarness");
 
 function loadUseGet() {
-  const filePath = require.resolve("./useGet");
+  const filePath = require.resolve("../src/hooks/useGet");
   delete require.cache[filePath];
-  return require("./useGet").useGet;
+  return require("../src/hooks/useGet").useGet;
 }
 
 describe("useGet Hook - BFF Migration & Security", () => {
@@ -193,7 +40,7 @@ describe("useGet Hook - BFF Migration & Security", () => {
     };
 
     // Sentinelle de sécurité : le client Supabase ne doit JAMAIS être importé ni accédé
-    const supabasePath = path.resolve(__dirname, "../utils/supabaseClient");
+    const supabasePath = path.resolve(__dirname, "../src/utils/supabaseClient");
     try {
       const resolved = require.resolve(supabasePath);
       require.cache[resolved] = {
@@ -255,7 +102,6 @@ describe("useGet Hook - BFF Migration & Security", () => {
     const useGet = loadUseGet();
     const harness = new HookHarness(useGet);
 
-    // Première recherche
     harness.render({ query: "prem", enabled: true });
     assert.ok(fetchCalls.length >= 1, "First search must initiate fetch");
     const firstCall = fetchCalls[0];
@@ -264,7 +110,6 @@ describe("useGet Hook - BFF Migration & Security", () => {
     assert.ok(firstSignal, "Fetch call must be passed an AbortSignal");
     assert.strictEqual(firstSignal.aborted, false, "First signal should not be aborted yet");
 
-    // Deuxième recherche rapide avant fin de la première
     harness.render({ query: "deuxieme", enabled: true });
 
     assert.strictEqual(
@@ -323,7 +168,7 @@ describe("useGet Hook - BFF Migration & Security", () => {
   });
 
   it("5. does not import or depend on Supabase browser client", () => {
-    const hookSourcePath = path.resolve(__dirname, "useGet.js");
+    const hookSourcePath = path.resolve(__dirname, "../src/hooks/useGet.js");
     const source = fs.readFileSync(hookSourcePath, "utf8");
 
     assert.ok(

@@ -1,12 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useMemo,
-} from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "../utils/supabaseClient";
 
 const QuoteContext = createContext();
@@ -108,6 +100,8 @@ export const QuoteProvider = ({ children }) => {
       }
     }
 
+    if (!supabase) return;
+
     try {
       const { count, error: countError } = await supabase
         .from("quotes")
@@ -178,6 +172,8 @@ export const QuoteProvider = ({ children }) => {
           localStorage.removeItem("dailyArticle");
         }
       }
+
+      if (!supabase) return;
 
       try {
         const { data, error } = await supabase

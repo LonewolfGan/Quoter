@@ -19,13 +19,10 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const tokenBuf = Buffer.from(token);
-  const secretBuf = Buffer.from(cronSecret);
+  const hashToken = crypto.createHash("sha256").update(token).digest();
+  const hashSecret = crypto.createHash("sha256").update(cronSecret).digest();
 
-  if (
-    tokenBuf.length !== secretBuf.length ||
-    !crypto.timingSafeEqual(tokenBuf, secretBuf)
-  ) {
+  if (!crypto.timingSafeEqual(hashToken, hashSecret)) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 

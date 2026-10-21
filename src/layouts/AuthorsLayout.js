@@ -10,7 +10,7 @@ export const AuthorsLayout = () => {
   const title = "Quoter - Authors";
   useTitle({ title });
   // Affiche le carousel seulement sur la page principale /authors
-  const showCarousel = location.pathname === "/authors";
+  const showCarousel = location.pathname.replace(/\/$/, "") === "/authors";
 
   const handleCardClick = useCallback(
     (

@@ -455,9 +455,6 @@ const loader = document.getElementById('loader');
 
     // Mouse wheel scrolling
     function onWheel(e) {
-      // Allow wheel immediately
-      e.preventDefault();
-
       const delta =
         Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
 
