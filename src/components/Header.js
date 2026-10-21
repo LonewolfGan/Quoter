@@ -1,11 +1,11 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect, useMemo } from "react";
-// No useTitle here
 import { CATEGORIES_LIST, slugify } from "../utils/categoryHelper";
 import logo from "../assets/logo/1.webp";
 import { ResponsiveImage } from "./ResponsiveImage";
+import { HeaderBackground } from "./header/HeaderBackground";
+import { MobileNav } from "./header/MobileNav";
 
-// Les images sont maintenant dans le dossier public/bg_images
 const imageIds = Array.from({ length: 10 }, (_, i) => 61 + i);
 
 export const Header = () => {
@@ -22,7 +22,7 @@ export const Header = () => {
   const preloadedRef = useRef(new Set());
   const currentIndexRef = useRef(0);
   const [isMobile, setIsMobile] = useState(
-    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
   );
   const isHiDpi =
     typeof window !== "undefined" ? window.devicePixelRatio > 1.5 : false;
@@ -35,32 +35,24 @@ export const Header = () => {
       return isHiDpi ? `/bg_images/${id}.webp` : `/bg_images/1280/${id}.webp`;
     });
   }, [isMobile, isHiDpi]);
-  const isHome = location.pathname === "/";
 
-  // Précharge seulement les images proches pour limiter le coût initial
   useEffect(() => {
-    const preloadImage = (index) => {
-      if (index < 0 || index >= images.length) return;
-      const src = images[index];
-      if (preloadedRef.current.has(src)) return;
-      const img = new Image();
-      img.src = src;
-      preloadedRef.current.add(src);
-    };
-
-    preloadImage(0);
-    preloadImage(1);
+    [0, 1].forEach((idx) => {
+      const src = images[idx];
+      if (src && !preloadedRef.current.has(src)) {
+        const img = new Image();
+        img.src = src;
+        preloadedRef.current.add(src);
+      }
+    });
   }, [images]);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Effet pour la rotation des images
   useEffect(() => {
     let timeout1, timeout2;
     let isMounted = true;
@@ -127,76 +119,25 @@ export const Header = () => {
 
   return (
     <header className="relative h-[100dvh] overflow-hidden">
-      {/* BACKGROUND avec double couche pour transition fluide */}
-      <div className="absolute z-0 inset-0">
-        {/* Couche de base - toujours visible */}
-        {images && images.length > 0 && (
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
-            style={{
-              backgroundImage: `url(${images[currentIndex]})`,
-              opacity: 0.5,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              willChange: "opacity",
-              transition: "opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1)",
-              backfaceVisibility: "hidden",
-              transform: "translateZ(0)",
-            }}
-            onError={(e) => {
-              console.error(
-                "Erreur de chargement de l'image de fond:",
-                images[currentIndex],
-              );
-              e.target.style.display = "none";
-            }}
-          />
-        )}
+      <HeaderBackground
+        images={images}
+        currentIndex={currentIndex}
+        nextIndex={nextIndex}
+        isTransitioning={isTransitioning}
+      />
 
-        {/* Couche de transition - apparaît par-dessus */}
-        {images && images.length > 0 && (
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-[1500ms] ease-in-out"
-            style={{
-              backgroundImage: `url(${images[nextIndex]})`,
-              opacity: isTransitioning ? 0.5 : 0,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              willChange: "opacity",
-              transition: "opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1)",
-              backfaceVisibility: "hidden",
-              transform: "translateZ(0)",
-            }}
-            onError={(e) => {
-              console.error(
-                "Erreur de chargement de l'image de transition:",
-                images[nextIndex],
-              );
-              e.target.style.display = "none";
-            }}
-          />
-        )}
-
-        {/* Overlay gradient pour meilleure lisibilité */}
-        <div className="absolute inset-0 border-b" />
-      </div>
-
-      {/* CONTENT */}
       <div className="flex flex-col items-center justify-between h-full py-8 text-lg sm:text-xl md:text-2xl lg:text-3xl">
-        {/* NAV EN HAUT */}
+        {/* DESKTOP NAV */}
         <div className="hidden md:block">
           <nav className="relative z-10 bg-white/40 backdrop-blur-2xl md:flex hidden w-fit flex-row justify-center items-center gap-4 lg:gap-10 border-2 m-2 py-2 px-6 lg:px-20 border-black rounded-full shadow-lg">
             <div className="flex gap-4 lg:gap-10">
               <NavLink
                 to="/"
-                className={`rounded-full py-2 px-4 border-2 transition
-     ${
-       location.pathname === "/"
-         ? "font-bold border-black"
-         : "border-transparent"
-     }`}
+                className={`rounded-full py-2 px-4 border-2 transition ${
+                  location.pathname === "/"
+                    ? "font-bold border-black"
+                    : "border-transparent"
+                }`}
               >
                 Accueil
               </NavLink>
@@ -209,9 +150,7 @@ export const Header = () => {
                 }`}
                 ref={dropRef}
               >
-                <div
-                  className={`flex flex-row items-center gap-2 cursor-pointer `}
-                >
+                <div className="flex flex-row items-center gap-2 cursor-pointer">
                   <NavLink to="/categories">Catégories</NavLink>
                   <span
                     className={`text-xl transition-transform duration-300 ${
@@ -236,7 +175,6 @@ export const Header = () => {
                   </span>
                 </div>
 
-                {/* DROPDOWN avec animation */}
                 <div
                   className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-64 bg-white/95 backdrop-blur-sm text-black border-2 border-black rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto transition-all duration-300 origin-top ${
                     drop
@@ -276,8 +214,9 @@ export const Header = () => {
               <NavLink
                 to="/authors"
                 className={({ isActive }) =>
-                  `rounded-full py-2 px-4 border-2 transition
-     ${isActive ? "font-bold border-black" : "border-transparent"}`
+                  `rounded-full py-2 px-4 border-2 transition ${
+                    isActive ? "font-bold border-black" : "border-transparent"
+                  }`
                 }
               >
                 Auteurs
@@ -285,8 +224,9 @@ export const Header = () => {
               <NavLink
                 to="/blog"
                 className={({ isActive }) =>
-                  `rounded-full py-2 px-4 border-2 transition
-     ${isActive ? "font-bold border-black" : "border-transparent"}`
+                  `rounded-full py-2 px-4 border-2 transition ${
+                    isActive ? "font-bold border-black" : "border-transparent"
+                  }`
                 }
               >
                 Blog
@@ -295,153 +235,59 @@ export const Header = () => {
           </nav>
         </div>
 
-        {/* MOBILE NAV */}
-        <nav
-          ref={menuRef}
-          className="relative z-10 flex md:hidden justify-between items-center w-[90%] bg-white/95 backdrop-blur-sm border-2 m-2 mx-4 p-2 border-black rounded-full shadow-lg"
-        >
-          <Link to="/" className="transition-transform hover:scale-105">
-            <ResponsiveImage
-              className="w-24"
-              src={logo}
-              alt="logo"
-              loading="eager"
-              decoding="async"
-              width={301}
-              height={262}
-            />
-          </Link>
-          <div>
-            <button
-              type="button"
-              aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-              aria-expanded={menuOpen}
-              aria-controls="mobile-menu"
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 text-gray-700 rounded-full outline-none focus:border-black focus:border transition-transform hover:scale-110"
-            >
-              {menuOpen ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              )}
-            </button>
-          </div>
+        <MobileNav
+          menuRef={menuRef}
+          menuOpen={menuOpen}
+          setMenuOpen={setMenuOpen}
+        />
 
-          {/* Menu mobile avec animation */}
-          <div
-            id="mobile-menu"
-            className={`absolute top-full left-0 w-full z-50 bg-white/95 backdrop-blur-sm border-2 border-black rounded-2xl mt-2 p-6 shadow-xl transition-all duration-300 origin-top ${
-              menuOpen
-                ? "flex flex-col items-center opacity-100 scale-100"
-                : "hidden opacity-0 scale-95"
-            }`}
-          >
-            <ul className="flex flex-col items-center justify-center space-y-8">
-              <li>
-                <NavLink
-                  onClick={() => setMenuOpen(false)}
-                  to="/categories"
-                  className={({ isActive }) => `
-                  font-bold border-2 rounded-full w-full py-2  px-10
-                    ${isActive ? "border-black" : "border-transparent"}`}
-                >
-                  Catégories
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  onClick={() => setMenuOpen(false)}
-                  to="/authors"
-                  className={({ isActive }) => `
-                  font-bold border-2  rounded-full w-full py-2  px-10
-                    ${isActive ? "border-black" : "border-transparent"}`}
-                >
-                  Auteurs
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  onClick={() => setMenuOpen(false)}
-                  to="/blog"
-                  className={({ isActive }) => `
-                  font-bold border-2  rounded-full w-full py-2  px-10
-                    ${isActive ? "border-black" : "border-transparent"}`}
-                >
-                  Blog
-                </NavLink>
-              </li>
-            </ul>
-          </div>
-        </nav>
-
+        {/* HERO BANNER & SEARCH INPUT */}
         <div className="text-center mx-auto flex flex-col items-center justify-center h-full">
-          {isHome ? (
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold text-black/75 tracking-tighter uppercase drop-shadow-sm mb-16">
-              L'INSPIRATION SANS LIMITES
-            </h1>
-          ) : (
-            <p className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold text-black/75 tracking-tighter uppercase drop-shadow-sm mb-16">
-              L'INSPIRATION SANS LIMITES
-            </p>
-          )}
+          <p className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold text-black/75 tracking-tighter uppercase drop-shadow-sm mb-16">
+            L'INSPIRATION SANS LIMITES
+          </p>
 
-          {/* SEARCH INPUT AU MILIEU */}
-          <div className="flex justify-between bg-white/90 backdrop-blur-sm border-black border-2 w-[85%]  rounded-full text-xl p-2 gap-2 shadow-lg">
+          <div className="flex justify-between bg-white/90 backdrop-blur-sm border-black border-2 w-[85%] rounded-full text-xl p-2 gap-2 shadow-lg">
             <input
               className="p-2 bg-transparent border-none w-3/4 outline-none placeholder-gray-500"
               type="text"
+              aria-label="Rechercher des citations"
               placeholder="Tapez votre recherche..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
-                  event.stopPropagation();
-                  event.target.blur();
-                  setSearchQuery("");
-                  if (searchQuery.trim().length > 0) {
-                    navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+                  if (searchQuery.trim()) {
+                    navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
                   }
                 }
               }}
             />
+
             <button
               onClick={() => {
-                if (searchQuery.trim().length > 0) {
-                  navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-                  setSearchQuery("");
+                if (searchQuery.trim()) {
+                  navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
                 }
               }}
-              className="text-white bg-black rounded-full p-2 w-1/4 text-lg sm:text-xl md:text-2xl lg:text-3xl whitespace-nowrap overflow-hidden text-ellipsis hover:bg-gray-800 transition-colors active:scale-95"
+              aria-label="Lancer la recherche"
+              className="bg-black text-white px-6 rounded-full font-semibold hover:bg-gray-800 transition-colors"
             >
-              Rechercher
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
             </button>
           </div>
         </div>
