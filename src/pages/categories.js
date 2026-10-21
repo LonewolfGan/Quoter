@@ -178,9 +178,12 @@ export const Categories = () => {
         }
 
         .hex-link:hover,
-        .hex-link:active {
-          filter: drop-shadow(0 8px 24px rgba(0,0,0,0.18));
+        .hex-link:active,
+        .hex-link:focus-visible {
+          filter: drop-shadow(0 8px 24px rgba(0,0,0,0.25));
           transform: translateY(-4px);
+          outline: 2px solid #000;
+          outline-offset: 4px;
         }
       `}</style>
 

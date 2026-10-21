@@ -170,47 +170,31 @@ export const QuoteProvider = ({ children }) => {
         }
       }
 
-      if (!supabase) {
-        const fallbackArticle = createFallbackArticle(quote, today);
-        setDailyArticle(fallbackArticle);
-        return;
-      }
-
       try {
-        const { data, error } = await supabase
-          .from("articles")
-          .select("*")
-          .eq("id", quote.id)
-          .maybeSingle();
-
-        if (error && error.code !== "PGRST116") throw error;
-
-        if (data) {
-          setDailyArticle(data);
-          localStorage.setItem(
-            "dailyArticle",
-            JSON.stringify({ date: today, article: data }),
-          );
-          return;
+        const res = await fetch(`/api/articles?id=${encodeURIComponent(quote.id)}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data) {
+            setDailyArticle(json.data);
+            localStorage.setItem(
+              "dailyArticle",
+              JSON.stringify({ date: today, article: json.data }),
+            );
+            return;
+          }
         }
-
-        setIsGenerating(true);
-        const fallbackArticle = createFallbackArticle(quote, today);
-        setDailyArticle(fallbackArticle);
-        localStorage.setItem(
-          "dailyArticle",
-          JSON.stringify({ date: today, article: fallbackArticle }),
-        );
-        setIsGenerating(false);
       } catch (err) {
-        setIsGenerating(false);
-        const fallbackArticle = createFallbackArticle(quote, today);
-        setDailyArticle(fallbackArticle);
-        localStorage.setItem(
-          "dailyArticle",
-          JSON.stringify({ date: today, article: fallbackArticle }),
-        );
+        if (process.env.NODE_ENV === "development") {
+          console.error("Erreur chargement article BFF:", err);
+        }
       }
+
+      const fallbackArticle = createFallbackArticle(quote, today);
+      setDailyArticle(fallbackArticle);
+      localStorage.setItem(
+        "dailyArticle",
+        JSON.stringify({ date: today, article: fallbackArticle }),
+      );
     },
     [],
   );

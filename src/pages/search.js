@@ -4,8 +4,8 @@ import { useGet } from "../hooks/useGet";
 export const Search = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const query = searchParams.get("q");
-  const hasQuery = !!query && query.trim().length > 0;
+  const query = searchParams.get("query") || searchParams.get("q") || "";
+  const hasQuery = query.trim().length > 0;
   const { data, isLoading } = useGet({ query: query, enabled: hasQuery });
   return (
     <main className="min-h-screen p-8">
