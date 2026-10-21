@@ -465,7 +465,7 @@ const loader = document.getElementById('loader');
       const wheelFactor = Math.min(Math.abs(delta), 100) * Math.sign(delta);
       vX += wheelFactor * WHEEL_SENS * 10;
     }
-    stage.addEventListener("wheel", onWheel, { passive: false });
+    stage.addEventListener("wheel", onWheel, { passive: true });
 
     // Prevent default drag behavior
     function onDragStart(e) {

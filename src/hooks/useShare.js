@@ -32,20 +32,26 @@ export const useShare = () => {
     if (typeof createImageBitmap !== "function") return blob;
 
     const bitmap = await createImageBitmap(blob);
-    const canvas = document.createElement("canvas");
-    canvas.width = bitmap.width;
-    canvas.height = bitmap.height;
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return blob;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return blob;
 
-    ctx.drawImage(bitmap, 0, 0);
+      ctx.drawImage(bitmap, 0, 0);
 
-    const pngBlob = await new Promise((resolve) =>
-      canvas.toBlob((result) => resolve(result), "image/png"),
-    );
+      const pngBlob = await new Promise((resolve) =>
+        canvas.toBlob((result) => resolve(result), "image/png"),
+      );
 
-    return pngBlob || blob;
+      return pngBlob || blob;
+    } finally {
+      if (typeof bitmap.close === "function") {
+        bitmap.close();
+      }
+    }
   };
 
   const share = async (imageUrl, quote = null) => {
