@@ -221,8 +221,17 @@ export const Categories = () => {
                 return (
                   <g
                     key={category}
-                    className="hex-link"
+                    className="hex-link cursor-pointer focus:outline-none"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Explorer la catégorie ${category}`}
                     onClick={() => navigate(`/categories/${slug}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        navigate(`/categories/${slug}`);
+                      }
+                    }}
                   >
                     <polygon points={points} className="hex-bg-glass" />
                     <polygon points={points} className="hex-shape" />

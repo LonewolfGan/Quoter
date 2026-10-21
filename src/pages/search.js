@@ -17,7 +17,7 @@ export const Search = () => {
       </button>
 
       <h1 className="text-4xl font-bold mb-15 text-center">
-        Resultas pour " {query} "
+        Résultats pour " {query} "
       </h1>
       {data === null ? null : data.length > 0 ? (
         <QuoteSection

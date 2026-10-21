@@ -24,6 +24,12 @@ const ArticleDetail = lazy(() =>
 const NotFound = lazy(() =>
   import("../pages/notFound").then((m) => ({ default: m.NotFound })),
 );
+const PrivacyPolicy = lazy(() =>
+  import("../pages/legal").then((m) => ({ default: m.PrivacyPolicy })),
+);
+const TermsConditions = lazy(() =>
+  import("../pages/legal").then((m) => ({ default: m.TermsConditions })),
+);
 
 const PageFallback = () => (
   <div className="min-h-screen bg-white flex items-center justify-center">
@@ -52,6 +58,8 @@ export const AllRoutes = () => {
 
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:id" element={<ArticleDetail />} />
+        <Route path="/privacy_policy" element={<PrivacyPolicy />} />
+        <Route path="/terms_conditions" element={<TermsConditions />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
