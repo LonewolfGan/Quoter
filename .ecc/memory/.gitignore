@@ -1,0 +1,3 @@
+# Ne pas committer de brouillons éphémères de mémoire
+*.tmp
+*.draft
