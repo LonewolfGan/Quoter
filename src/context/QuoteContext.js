@@ -41,20 +41,13 @@ export const QuoteProvider = ({ children }) => {
 
   const isLoadingRef = useRef(false);
 
-  /* =====================================================
-     FALLBACK QUOTE
-  ===================================================== */
   const getFallbackQuote = () => ({
     id: "fallback-quote-" + Date.now(),
-    quote_text:
-      "La persévérance est la clé du succès, même face aux obstacles techniques.",
+    quote_text: "La persévérance est la clé du succès, même face aux obstacles techniques.",
     quote_author: "Sagesse Tech",
     category: "Motivation",
   });
 
-  /* =====================================================
-     FALLBACK ARTICLE
-  ===================================================== */
   const createFallbackArticle = (quote, today) => ({
     id: quote?.id || "fallback-article-" + Date.now(),
     type: "analysis",
@@ -100,7 +93,11 @@ export const QuoteProvider = ({ children }) => {
       }
     }
 
-    if (!supabase) return;
+    if (!supabase) {
+      const fallback = getFallbackQuote();
+      setDailyQuote(fallback);
+      return fallback;
+    }
 
     try {
       const { count, error: countError } = await supabase
@@ -173,7 +170,11 @@ export const QuoteProvider = ({ children }) => {
         }
       }
 
-      if (!supabase) return;
+      if (!supabase) {
+        const fallbackArticle = createFallbackArticle(quote, today);
+        setDailyArticle(fallbackArticle);
+        return;
+      }
 
       try {
         const { data, error } = await supabase

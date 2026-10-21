@@ -1,6 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { supabase } from "../utils/supabaseClient";
 import {
   ClipboardPen,
   ScrollText,
@@ -33,24 +32,24 @@ export const ArticleDetail = () => {
     const loadArticle = async () => {
       try {
         setIsLoading(true);
-        const { data, error } = await supabase
-          .from("articles")
-          .select(
-            "id, title, excerpt, author, category, read_time, published_date, content",
-          )
-          .eq("id", id)
-          .single();
-
-        if (error) throw error;
-
-        if (!data) {
+        const res = await fetch(`/api/articles?id=${encodeURIComponent(id)}`);
+        if (!res.ok) {
+          if (res.status === 404) {
+            setError("Article introuvable");
+            return;
+          }
+          throw new Error("Erreur de chargement");
+        }
+        const json = await res.json();
+        if (!json.data) {
           setError("Article introuvable");
           return;
         }
-
-        setArticle(data);
+        setArticle(json.data);
       } catch (err) {
-        console.error("❌ Erreur chargement article:", err);
+        if (process.env.NODE_ENV === "development") {
+          console.error("Erreur chargement article:", err);
+        }
         setError("Erreur lors du chargement de l'article");
       } finally {
         setIsLoading(false);
